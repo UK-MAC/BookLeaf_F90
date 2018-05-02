@@ -1,0 +1,63 @@
+# Compiler
+FC = mpif90
+CC = pgcc
+
+# General flags
+REALSIZE     = -r8
+INTSIZE      = -i4
+FORM         = -Mfree
+# Open MP
+ifeq ($(NO_OMP),)
+  OPENMP = -mp=nonuma
+else
+  OPENMP =
+endif
+# level flags
+ifeq ($(LEV),MEMDEBUG)
+  OPT     = -O0
+  COPT    = -O0
+  DBG     = -g -C -Mchkstk -Ktrap=fp -Mchkfpstk -Mchkptr -Kieee
+  CDBG    = -g 
+endif
+ifeq ($(LEV),DEBUG)
+  OPT     = -O0
+  COPT    = -O0
+  DBG     = -g -C -Mchkstk -Ktrap=fp -Mchkfpstk -Mchptr -Kieee
+  CDBG    = -g 
+endif
+ifeq ($(LEV),TV)
+  OPT     = -O0
+  COPT    = -O0
+  DBG     = -g -Kieee
+  CDBG    = -g 
+endif
+ifeq ($(LEV),MEMTV)
+  OPT     = -O0
+  COPT    = -O0
+  DBG     = -g -C -Kieee
+  CDBG    = -g 
+endif
+ifeq ($(LEV),OPTDEBUG)
+  OPT     = -O2
+  COPT    = -O2
+  DBG     = -gopt -Kieee
+  CDBG    = -gopt
+endif
+ifeq ($(LEV),RELEASE)
+  OPT     = -fastsse -gopt -Mipa=fast -Mlist
+  COPT    =
+  DBG     = -Kieee
+  CDBG    =
+endif
+ifeq ($(LEV),OPT)
+  OPT     = -fastsse -gopt -Mipa=fast -Mlist
+  COPT    =
+  DBG     =
+  CDBG    =
+endif
+
+FFLAGS = -c $(REALSIZE) $(INTSIZE) $(FORM) $(DBG) $(OPT) $(OPENMP)
+
+CFLAGS = -c $(CDBG) $(COPT)
+
+LFLAGS = $(DBG) $(OPT) $(OPENMP) -o

@@ -1,0 +1,60 @@
+# Compiler
+FC = ftn
+CC = cc
+
+# General flags
+REALSIZE     = -s real64
+INTSIZE      = -s integer32
+FORM         = -f free
+IEEE         = -h fp0 -hflex_mp=intolerant
+# Open MP
+OPENMP =
+# level flags
+ifeq ($(LEV),MEMDEBUG)
+  OPT     = -O0
+  COPT    = -O0
+  DBG     = -g -m2 -O nooverindex -eD -K trap=divz,inv -h fp0 -hflex_mp=intolerant
+  CDBG    = -g 
+endif
+ifeq ($(LEV),DEBUG)
+  OPT     = -O0
+  COPT    = -O0
+  DBG     = -g -m2 -eD -K trap=divz,inv -h fp0 -hflex_mp=intolerant
+  CDBG    = -g 
+endif
+ifeq ($(LEV),TV)
+  OPT     = -O0
+  COPT    = -O0
+  DBG     = -g -h fp0 -hflex_mp=intolerant
+  CDBG    = -g -O0
+endif
+ifeq ($(LEV),MEMTV)
+  OPT     = -O0
+  COPT    = -O0
+  DBG     = -g -O nooverindex -h fp0 -hflex_mp=intolerant
+  CDBG    = -g 
+endif
+ifeq ($(LEV),OPTDEBUG)
+  OPT     = -O2
+  COPT    = -O2
+  DBG     = -g -h fp0 -hflex_mp=intolerant
+  CDBG    = -g 
+endif
+ifeq ($(LEV),RELEASE)
+  OPT     = -O2
+  COPT    = -O2
+  DBG     = -h fp0 -hflex_mp=intolerant
+  CDBG    =
+endif
+ifeq ($(LEV),OPT)
+  OPT     = -ra
+  COPT    = -ra
+  DBG     =
+  CDBG    =
+endif
+
+FFLAGS = -c $(REALSIZE) $(INTSIZE) $(FORM) $(DBG) $(OPT) $(OPENMP)
+
+CFLAGS = -c $(CDBG) $(COPT)
+
+LFLAGS = $(DBG) $(OPT) $(OPENMP) -o

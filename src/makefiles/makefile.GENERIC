@@ -1,0 +1,31 @@
+# Alias
+MAKE    = gmake
+
+# Silo library location
+ifneq ($(SILO),)
+  SILODIR = /usr/local/silo
+  SILOINC = -I$(SILODIR)/include
+  SILOLIB = -L$(SILODIR)/lib -lsiloh5
+endif
+
+# TyphonIO library location
+ifneq ($(TIO),)
+  TIO_DIR = 
+  TIO_INC = -I$(TIO_DIR)/include
+  TIO_LIB = -L$(TIO_DIR)/lib -ltyphonio_f -ltyphonio
+endif
+
+# Auxilary library locations
+ifneq ($(SILO)$(TIO),)
+  HDF5DIR = /usr/local/hdf5
+  HDF5INC = -I$(HDF5DIR)/include
+  HDF5LIB = -L$(HDF5DIR)/lib -lhdf5_fortran -lhdf5
+  ZLIB    = -L$(COM_PATH_S)/external/zli$(ZLIB_VER)/lib64 -lz
+endif
+
+# Metis library locations
+ifneq ($(METIS),)
+  METISDIR = 
+  METISINC = -I$(METISDIR)/include
+  METISLIB = -L$(METISDIR)/lib -lparmetis -lmetis
+endif

@@ -1,0 +1,31 @@
+#
+# !Crown Copyright 2014 AWE.
+# !
+# ! This file is part of Bookleaf.
+# !
+# ! Bookleaf is free software: you can redistribute it and/or modify it under
+# ! the terms of the GNU General Public License as published by the
+# ! Free Software Foundation, either version 3 of the License, or (at your option)
+# ! any later version.
+# !
+# ! Bookleaf is distributed in the hope that it will be useful, but
+# ! WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# ! FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# ! details.
+# !
+# ! You should have received a copy of the GNU General Public License along with
+# ! Bookleaf. If not, see http://www.gnu.org/licenses/.
+#
+#
+# Object list
+OBJ += hydro_dr_getacceleration.o   \
+       hydro_dr_getcs2.o            \
+       hydro_dr_getdt.o             \
+       hydro_dr_getenergy.o         \
+       hydro_dr_geteos.o            \
+       hydro_dr_getforce.o          \
+       hydro_dr_getstate.o          \
+       hydro_dr_getviscosity.o      \
+       hydro_dr_init.o              \
+       hydro_dr_set.o               \
+       hydro_dr_print.o

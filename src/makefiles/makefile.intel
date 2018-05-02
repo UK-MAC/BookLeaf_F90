@@ -1,0 +1,90 @@
+# Compiler
+# Default assume MPI and Xeon Target
+FC = mpif90
+CC = mpicc
+#If Xeon Phi, then need different MPI wrappers
+ifneq ($(PHI),)
+  FC = mpiifort
+  CC = mpicc
+endif
+#No MPI from cmd line then serial for both Xeon and Xeon Phi targets
+ifneq ($(NO_MPI),)
+  FC = ifort
+  CC = icc
+endif
+
+# General flags
+REALSIZE     = -r8
+INTSIZE      = -i4
+FORM         = -free
+ifneq ($(PHI),)
+#if Phi vectorisation picked up through mmic flag
+  MIC  = -mmic
+endif
+# Open MP
+ifeq ($(NO_OMP),)
+  OPENMP = -qopenmp
+else
+  OPENMP =
+endif
+# level flags
+ifeq ($(LEV),MEMDEBUG)
+  OPT     = -O0
+  COPT    = -O0
+  DBG     = -g -warn all -traceback -fpe0 -check all
+  CDBG    = -g -traceback
+  STND    = -fp-model precise -fp-model source -ftz -mP2OPT_hlo_loop_unroll=false \
+	    -heap-arrays 64 -shared-intel
+endif
+ifeq ($(LEV),DEBUG)
+  OPT     = -O0
+  COPT    = -O0
+  DBG     = -g -warn all -traceback -fpe0 -check pointers -check uninit
+  CDBG    = -g -traceback
+  STND    = -fp-model precise -fp-model source -ftz -mP2OPT_hlo_loop_unroll=false \
+	    -heap-arrays 64 -shared-intel
+endif
+ifeq ($(LEV),TV)
+  OPT     = -O0
+  COPT    = -O0
+  DBG     = -g -traceback
+  CDBG    = -g -traceback
+  STND    = -fp-model precise -fp-model source -no-ftz -mP2OPT_hlo_loop_unroll=false \
+	    -heap-arrays 64 -shared-intel
+endif
+ifeq ($(LEV),MEMTV)
+  OPT     = -O0
+  COPT    = -O0
+  DBG     = -g -traceback -check bounds
+  CDBG    = -g -traceback
+  STND    = -fp-model precise -fp-model source -no-ftz -mP2OPT_hlo_loop_unroll=false \
+	    -heap-arrays 64 -shared-intel
+endif
+ifeq ($(LEV),OPTDEBUG)
+  OPT     = -O2
+  COPT    = -O2
+  DBG     = -g -traceback
+  CDBG    = -g -traceback
+  STND    = -no-ftz 
+endif
+ifeq ($(LEV),OPT)
+  OPT     = -O3 -xhost
+  COPT    = -O3 -xhost
+  DBG     = -g
+  CDBG    = -g
+  STND    =
+endif
+ifeq ($(LEV),RELEASE)
+  OPT     = -O2 -finline-functions -unroll-aggressive -qopt-report=3
+  COPT    = -O2 -qopt-report=3
+  DBG     =
+  CDBG    =
+  STND    = -fp-model precise -fp-model source -no-ftz -mPOPT_hlo_loop_unroll=false \
+	    -heap-arrays 64 -shared-intel
+endif
+
+FFLAGS = -c $(REALSIZE) $(INTSIZE) $(FORM) $(STND) $(DBG) $(OPT) $(OPENMP) $(MIC)
+
+CFLAGS = -c $(CDBG) $(COPT) $(MIC)
+
+LFLAGS = $(DBG) $(OPT) $(OPENMP) $(MIC) -o

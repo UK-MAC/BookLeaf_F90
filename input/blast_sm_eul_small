@@ -1,0 +1,65 @@
+&CONTROL
+ time_start=0.0
+ time_end=3.8
+ dt_initial=1.0e-5
+ dt_max=1.0e-1
+ dt_min=1.0e-15
+ dt_g=1.02
+ cfl_sf=0.5
+ cvisc1=0.5
+ cvisc2=0.75
+ kappaall=0.05
+/
+&EOS
+ eos_type(1)='ideal gas'
+ eos_param(1,1)=1.4
+/
+&MESH
+ region_typ(1)='LIN1'
+ region_dim(1,:)=800,8
+ region_side(1,1,:)=1,1
+ region_side(1,2,:)=1,2
+ region_side(1,3,:)=1,3
+ region_side(1,4,:)=1,4
+ segment_typ(:)='LINE','LINE','LINE','LINE'
+ segment_bc(:)='SLIPY','SLIPX','SLIPY','SLIPX'
+ segment_pos(1,:)=0.0,0.0,100.0,0.0
+ segment_pos(2,:)=100.0,0.0,100.0,1.0
+ segment_pos(3,:)=100.0,1.0,0.0,1.0
+ segment_pos(4,:)=0.0,1.0,0.0,0.0
+/
+&ALE
+ zeul=.TRUE.
+/ 
+&INDICATORS
+ region_type(1)='background'
+ region_name(1)='background'
+ region_type(2)='shape'
+ region_name(2)='sourceA'
+ region_value(2)=1
+ region_type(3)='shape'
+ region_name(3)='sourceB'
+ region_value(3)=2
+ material_type(1)='background'
+ material_name(1)='air'
+/
+&INITIAL_CONDITIONS
+ thermodynamic_type(1)='region'
+ thermodynamic_value(1)=1
+ density(1)=1.0
+ energy(1)=0.025
+ thermodynamic_type(2)='region'
+ thermodynamic_value(2)=2
+ density(2)=1.0
+ energy(2)=2500.0
+ thermodynamic_type(3)='region'
+ thermodynamic_value(3)=3
+ density(3)=1.0
+ energy(3)=250.0
+/ 
+&SHAPES
+ shape_type(1)='rectangle'
+ shape_param(1,:)=-10.0,-50.0,10.0,50.0
+ shape_type(2)='rectangle'
+ shape_param(2,:)=90.0,-50.0,110.0,50.0
+/

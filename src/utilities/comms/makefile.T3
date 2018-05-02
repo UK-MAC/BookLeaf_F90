@@ -1,0 +1,33 @@
+#
+# !Crown Copyright 2014 AWE.
+# !
+# ! This file is part of Bookleaf.
+# !
+# ! Bookleaf is free software: you can redistribute it and/or modify it under
+# ! the terms of the GNU General Public License as published by the
+# ! Free Software Foundation, either version 3 of the License, or (at your option)
+# ! any later version.
+# !
+# ! Bookleaf is distributed in the hope that it will be useful, but
+# ! WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# ! FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# ! details.
+# !
+# ! You should have received a copy of the GNU General Public License along with
+# ! Bookleaf. If not, see http://www.gnu.org/licenses/.
+#
+#
+# Object list
+OBJ +=    t3_types.o          \
+          t3_collect.o        \
+          t3_decomposition.o  \
+	  t3_distribute.o     \
+          t3_exchange.o       \
+          t3_keys.o           \
+          t3_util.o           \
+          t3_quantity.o       \
+          t3_register.o       \
+          t3_schedule.o       \
+          t3_dt_reduce.o      \
+          typhon_API.o        \
+	  comms_types.o

@@ -1,0 +1,70 @@
+# Compiler
+ifeq ($(NO_MPI),)
+  FC = mpif90
+  CC = mpicc
+else
+  FC = f90
+  CC = cc
+endif
+
+# General flags
+REALSIZE     = -xtypemap=real:64
+INTSIZE      = -xtypemap=integer:32
+FORM         = -free
+# Open MP
+ifeq ($(NO_OMP),)
+  OPENMP = -xopenmp=parallel -vpara
+else
+  OPENMP = 
+endif
+# level flags
+ifeq ($(LEV),MEMDEBUG)
+  OPT     = -O0
+  COPT    = -O0
+  DBG     = -g -xopenmp=noopt -stackvar -u -fpover=yes -C -ftrap=common -fsimple=0 \
+	    -fns=no
+  CDBG    = -g 
+endif
+ifeq ($(LEV),DEBUG)
+  OPT     = -O0
+  COPT    = -O0
+  DBG     = -g -xopenmp=noopt -stackvar -u -fpover=yes -C -ftrap=common -fsimple=0 \
+	    -fns=no
+  CDBG    = -g 
+endif
+ifeq ($(LEV),TV)
+  OPT     = -O0
+  COPT    = -O0
+  DBG     = -g -fsimple=0 -fns=no
+  CDBG    = -g -O0
+endif
+ifeq ($(LEV),MEMTV)
+  OPT     = -O0
+  COPT    = -O0
+  DBG     = -g -fsimpl=0 -fns=no
+  CDBG    = -g 
+endif
+ifeq ($(LEV),OPTDEBUG)
+  OPT     = -fast -xipo=2
+  COPT    = -fast -xipo=2
+  DBG     = -g -fsimple=0 -fns=no
+  CDBG    = -g 
+endif
+ifeq ($(LEV),OPT)
+  OPT     = -fast -xipo=2
+  COPT    = -fast -xipo=2
+  DBG     = -g
+  CDBG    = -g
+endif
+ifeq ($(LEV),RELEASE)
+  OPT     = -fast -xipo=2
+  COPT    = -fast -xipo=2
+  DBG     =
+  CDBG    =
+endif
+
+FFLAGS = -c $(REALSIZE) $(INTSIZE) $(FORM) $(DBG) $(OPT) $(OPENMP)
+
+CFLAGS = -c $(CDBG) $(COPT)
+
+LFLAGS = $(DBG) $(OPT) $(OPENMP) -o

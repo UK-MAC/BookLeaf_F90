@@ -1,0 +1,69 @@
+# Compiler
+ifeq ($(NO_MPI),)
+  FC=mpif90
+  CC=mpicc
+else
+  FC=gfortran
+  CC=gcc
+endif
+
+# General flags
+REAL_SIZE   = -fdefault-real-8
+INT_SIZE    = 
+FORM        = -ffree-form -std=f2008
+# Open MP
+ifeq ($(NO_OMP),)
+  OPENMP    = -fopenmp
+else
+  OPENMP    =
+endif
+# level flags
+ifeq ($(LEV),MEMDEBUG)
+  OPT     = -O
+  COPT    = -O
+  DBG     = -g -Wunused -Wuninitialized -fbacktrace -fbounds-check \
+	    -ffpe-trap=invalid,zero
+  CDBG    = -g -Wunused -Wuninitialized 
+endif
+ifeq ($(LEV),DEBUG)
+  OPT     = -O
+  COPT    = -O
+  DBG     = -g -Wunused -Wuninitialized -fbacktrace -ffpe-trap=invail,zero
+  CDBG    = -g -Wunused -Wuninitialized
+endif
+ifeq ($(LEV),TV)
+  OPT     = -O
+  COPT    = -O
+  DBG     = -g -fbacktrace
+  CDBG    = -g 
+endif
+ifeq ($(LEV),MEMTV)
+  OPT     = -O
+  COPT    = -O
+  DBG     = -g -fbacktrace -fbounds-check
+  CDBG    = -g 
+endif
+ifeq ($(LEV),OPTDEBUG)
+  OPT     = -O2
+  COPT    = -O2
+  DBG     = -g -fbacktrace
+  CDBG    = -g 
+endif
+ifeq ($(LEV),RELEASE)
+  OPT     = -O2 -funroll-loops -ftree-vectorize
+  COPT    = -O2 -ftree-vectorize
+  DBG     =
+  CDBG    =
+endif
+ifeq ($(LEV),OPT)
+  OPT     = -O2 -funroll-loops -ftree-vectorize
+  COPT    = -O2 -ftree-vectorize
+  DBG     =
+  CDBG    =
+endif
+
+FFLAGS = -c $(REALSIZE) $(INTSIZE) $(FORM) $(DBG) $(OPT) $(OPENMP)
+
+CFLAGS = -c $(CDBG) $(COPT)
+
+LFLAGS = $(DBG) $(OPT) $(OPENMP) -o

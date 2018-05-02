@@ -1,0 +1,71 @@
+# Compiler
+ifeq ($(NO_MPI),)
+  FC = mpxlf95_r
+  CC = mpcc_r
+else
+  FC = mpxlf90_r
+  CC = mpcc_r
+endif
+
+# General flags
+REALSIZE     = -qrealsize=8
+INTSIZE      = -qintsize=4
+FORM         = -qfree
+# Open MP
+ifeq ($(NO_OMP),)
+  OPENMP = -qsmp=omp -qthreaded
+else
+  OPENMP = 
+endif
+# level flags
+ifeq ($(LEV),MEMDEBUG)
+  OPT     = -O0
+  COPT    = -O0
+  DBG     = -g -qfullpath -qsource -qinit=f90ptr -qsigtrap -qcheck -qinitauto=FF   \
+	    -qmaxmem=-1 -qflttrap=ov:zero:invalid:en -qfloat=nomaf
+  CDBG    = -g -qfullpath -qsource -qsrcmsg
+endif
+ifeq ($(LEV),DEBUG)
+  OPT     = -O0
+  COPT    = -O0
+  DBG     = -g -qfullpath -qsource -qinit=f90ptr -qsigtrap -qcheck -qinitauto=FF  \
+	    -qmaxmem=-1 -qflttrap=ov:zero:invalid:en -qfloat=nomaf
+  CDBG    = -g -qfullpath -qsource -qsrcmsg
+endif
+ifeq ($(LEV),TV)
+  OPT     = -O0
+  COPT    = -O0
+  DBG     = -g -qfullpath -qsource -qinit=f90ptr -qsigtrap -qcheck -qinitauto=FF \
+	    -qmaxmem=-1 -qflttrap=ov:zero:invalid:en -qfloat=nomaf
+  CDBG    = -g -qfullpath -qsource -qsrcmsg
+endif
+ifeq ($(LEV),MEMTV)
+  OPT     = -O0
+  COPT    = -O0
+  DBG     = -g -qfullpath -qsource -qinit=f90ptr -qsigtrap -qcheck -qinitauto=FF \
+	    -qmaxmem=-1 -qflttrap=ov:zero:invalid:en -qfloat=nomaf
+  CDBG    = -g -qfullpath -qsource -qsrcmsg
+endif
+ifeq ($(LEV),OPTDEBUG)
+  OPT     = -O3 -Q
+  COPT    = -O3 -Q
+  DBG     = -g -qfloat=nomaf
+  CDBG    = -g
+endif
+ifeq ($(LEV),OPT)
+  OPT     = -O3 -Q
+  COPT    = -O3 -Q
+  DBG     = -qfullpath -g -qsigtrap
+  CDBG    = -qfullpath -g
+ifeq ($(LEV),RELEASE)
+  OPT     = -O3 -Q
+  COPT    = -O3 -Q
+  DBG     = -qfloat=nomaf
+  CDBG    =
+endif
+
+FFLAGS = -c $(REALSIZE) $(INTSIZE) $(FORM) $(DBG) $(OPT) $(OPENMP)
+
+CFLAGS = -c $(CDBG) $(COPT)
+
+LFLAGS = $(DBG) $(OPT) $(OPENMP) -o

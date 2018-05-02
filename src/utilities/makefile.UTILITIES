@@ -1,0 +1,54 @@
+#
+# !Crown Copyright 2014 AWE.
+# !
+# ! This file is part of Bookleaf.
+# !
+# ! Bookleaf is free software: you can redistribute it and/or modify it under
+# ! the terms of the GNU General Public License as published by the
+# ! Free Software Foundation, either version 3 of the License, or (at your option)
+# ! any later version.
+# !
+# ! Bookleaf is distributed in the hope that it will be useful, but
+# ! WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+# ! FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+# ! details.
+# !
+# ! You should have received a copy of the GNU General Public License along with
+# ! Bookleaf. If not, see http://www.gnu.org/licenses/.
+#
+# Directories
+UTLEODIR = $(UTLDIR)/eos
+UTLGEDIR = $(UTLDIR)/geometry
+UTLUTDIR = $(UTLDIR)/utils
+UTLCUDIR = $(UTLDIR)/cutils
+UTLPUDIR = $(UTLDIR)/putils
+UTLCODIR = $(UTLDIR)/comms
+UTLDADIR = $(UTLDIR)/data
+UTLDNDIR = $(UTLDIR)/density
+UTLIODIR = $(UTLDIR)/io
+UTLMXDIR = $(UTLDIR)/mix
+# Path
+UTLPATH = $(UTLEOPATH):$(UTLGEPATH):$(UTLUTPATH):$(UTLCODIR):$(UTLCUDIR):      \
+          $(UTLDADIR):$(UTLDNPATH):$(UTLIOPATH):$(UTLMXPATH)
+# Object list
+include $(UTLEODIR)/makefile.EOS
+include $(UTLGEDIR)/makefile.GEOMETRY
+include $(UTLUTDIR)/makefile.UTILS
+include $(UTLDADIR)/makefile.DATA
+include $(UTLDNDIR)/makefile.DENSITY
+include $(UTLIODIR)/makefile.IO
+include $(UTLMXDIR)/makefile.MIX
+ifeq ($(NO_MPI),)
+  ifneq (,$(findstring $(MAKECMDGOALS),$(EXE)))
+    include $(UTLCODIR)/makefile.T3
+  endif
+else
+  ifneq (,$(findstring $(MAKECMDGOALS),$(EXE)))
+    include $(UTLCODIR)/makefile.T1
+  endif
+endif
+ifneq ($(SILO),)
+  ifneq (,$(findstring $(MAKECMDGOALS),$(EXE)))
+    include $(UTLCUDIR)/makefile.CUTILS
+  endif
+endif
