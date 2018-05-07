@@ -49,7 +49,7 @@
  density(2)=0.125
  energy(2)=2.0
 /
-/SHAPES
+&SHAPES
  shape_type(1)='rectangle'
  shape_param(1,:)=50.0,-10.0,150.0,50.0
 / 
