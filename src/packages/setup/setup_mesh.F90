@@ -26,6 +26,7 @@ MODULE setup_mesh_mod
   USE setup_rcb_mod,      ONLY: setup_rcb
 #endif
   USE utils_kn_string_mod,ONLY: utils_kn_findstr
+  USE utils_kn_sort_mod,  ONLY: utils_kn_binary_search
 
   IMPLICIT NONE
 
@@ -1385,8 +1386,9 @@ CONTAINS
     TYPE(error_t),                   INTENT(OUT) :: error
     ! Local
     REAL(KIND=rlk)                   :: xx,yy,w1
-    INTEGER(KIND=ink)                :: ii,ll,l1,l2,kk,k1,k2,icount,ind,indg
+    INTEGER(KIND=ink)                :: ii,ll,l1,l2,kk,k1,k2,icount,ind,indg,iindx
     INTEGER(KIND=ink),DIMENSION(nnd) :: istore
+    LOGICAL(KIND=lok)                :: zpresent
 
     ! local decomposition, assume nreg=1
 
@@ -1406,160 +1408,160 @@ CONTAINS
       DO kk=k1,k2
         DO ll=l1,l2
           indg=ll+(kk-1_ink)*l2
-          DO ind=1,nnd
-            IF (ndlist(ind).EQ.indg) THEN
-              IF (ll.EQ.l1) THEN
-                IF (reg(1)%merged(ll,kk)) THEN
-                ELSE
-                  icount=icount+1_ink
-                  ndx(icount)=reg(1)%ss(ll,kk)
-                  ndy(icount)=reg(1)%rr(ll,kk)
-                  IF (reg(1)%bc(ll,kk).GT.0_ink) THEN
-                    indtype(icount)=-reg(1)%bc(ll,kk)
-                    istore(icount)=1_ink
-                  ELSE
-                    error%ierr=FAILURE
-                    error%iout=HALT_SINGLE
-                    error%serr='ERROR: undefined BC at mesh edge'
-                    RETURN
-                  ENDIF
-                ENDIF
-              ELSEIF (ll.EQ.l2) THEN
-                IF (reg(1)%merged(ll,kk)) THEN
-                ELSE
-                  icount=icount+1_ink
-                  ndx(icount)=reg(1)%ss(ll,kk)
-                  ndy(icount)=reg(1)%rr(ll,kk)
-                  IF (reg(1)%bc(ll,kk).GT.0_ink) THEN
-                    indtype(icount)=-reg(1)%bc(ll,kk)
-                    istore(icount)=1_ink
-                  ELSE
-                    error%ierr=FAILURE
-                    error%iout=HALT_SINGLE
-                    error%serr='ERROR: undefined BC at mesh edge'
-                    RETURN
-                  ENDIF
-                ENDIF
-              ELSEIF (kk.EQ.k1) THEN
-                IF (reg(1)%merged(ll,kk)) THEN
-                ELSE
-                  icount=icount+1_ink
-                  ndx(icount)=reg(1)%ss(ll,kk)
-                  ndy(icount)=reg(1)%rr(ll,kk)
-                  IF (reg(1)%bc(ll,kk).GT.0_ink) THEN
-                    indtype(icount)=-reg(1)%bc(ll,kk)
-                    istore(icount)=1_ink
-                  ELSE
-                    error%ierr=FAILURE
-                    error%iout=HALT_SINGLE
-                    error%serr='ERROR: undefined BC at mesh edge'
-                    RETURN
-                  ENDIF
-                ENDIF
-              ELSEIF (kk.EQ.k2) THEN
-                IF (reg(1)%merged(ll,kk)) THEN
-                ELSE
-                  icount=icount+1_ink
-                  ndx(icount)=reg(1)%ss(ll,kk)
-                  ndy(icount)=reg(1)%rr(ll,kk)
-                  IF (reg(1)%bc(ll,kk).GT.0_ink) THEN
-                    indtype(icount)=-reg(1)%bc(ll,kk)
-                    istore(icount)=1_ink
-                  ELSE
-                    error%ierr=FAILURE
-                    error%iout=HALT_SINGLE
-                    error%serr='ERROR: undefined BC at mesh edge'
-                    RETURN
-                  ENDIF
-                ENDIF
+          iindx=utils_kn_binary_search(ndlist, indg)
+          zpresent=iindx.NE.-1_ink
+          IF (zpresent) THEN
+            IF (ll.EQ.l1) THEN
+              IF (reg(1)%merged(ll,kk)) THEN
               ELSE
                 icount=icount+1_ink
                 ndx(icount)=reg(1)%ss(ll,kk)
                 ndy(icount)=reg(1)%rr(ll,kk)
-                indtype(icount)=1_ink
+                IF (reg(1)%bc(ll,kk).GT.0_ink) THEN
+                  indtype(icount)=-reg(1)%bc(ll,kk)
+                  istore(icount)=1_ink
+                ELSE
+                  error%ierr=FAILURE
+                  error%iout=HALT_SINGLE
+                  error%serr='ERROR: undefined BC at mesh edge'
+                  RETURN
+                ENDIF
               ENDIF
+            ELSEIF (ll.EQ.l2) THEN
+              IF (reg(1)%merged(ll,kk)) THEN
+              ELSE
+                icount=icount+1_ink
+                ndx(icount)=reg(1)%ss(ll,kk)
+                ndy(icount)=reg(1)%rr(ll,kk)
+                IF (reg(1)%bc(ll,kk).GT.0_ink) THEN
+                  indtype(icount)=-reg(1)%bc(ll,kk)
+                  istore(icount)=1_ink
+                ELSE
+                  error%ierr=FAILURE
+                  error%iout=HALT_SINGLE
+                  error%serr='ERROR: undefined BC at mesh edge'
+                  RETURN
+                ENDIF
+              ENDIF
+            ELSEIF (kk.EQ.k1) THEN
+              IF (reg(1)%merged(ll,kk)) THEN
+              ELSE
+                icount=icount+1_ink
+                ndx(icount)=reg(1)%ss(ll,kk)
+                ndy(icount)=reg(1)%rr(ll,kk)
+                IF (reg(1)%bc(ll,kk).GT.0_ink) THEN
+                  indtype(icount)=-reg(1)%bc(ll,kk)
+                  istore(icount)=1_ink
+                ELSE
+                  error%ierr=FAILURE
+                  error%iout=HALT_SINGLE
+                  error%serr='ERROR: undefined BC at mesh edge'
+                  RETURN
+                ENDIF
+              ENDIF
+            ELSEIF (kk.EQ.k2) THEN
+              IF (reg(1)%merged(ll,kk)) THEN
+              ELSE
+                icount=icount+1_ink
+                ndx(icount)=reg(1)%ss(ll,kk)
+                ndy(icount)=reg(1)%rr(ll,kk)
+                IF (reg(1)%bc(ll,kk).GT.0_ink) THEN
+                  indtype(icount)=-reg(1)%bc(ll,kk)
+                  istore(icount)=1_ink
+                ELSE
+                  error%ierr=FAILURE
+                  error%iout=HALT_SINGLE
+                  error%serr='ERROR: undefined BC at mesh edge'
+                  RETURN
+                ENDIF
+              ENDIF
+            ELSE
+              icount=icount+1_ink
+              ndx(icount)=reg(1)%ss(ll,kk)
+              ndy(icount)=reg(1)%rr(ll,kk)
+              indtype(icount)=1_ink
             ENDIF
-          ENDDO
+          ENDIF
         ENDDO
       ENDDO
     ELSE
       DO kk=k1,k2
         DO ll=l1,l2
           indg=kk+(ll-1_ink)*k2
-          DO ind=1,nnd
-            IF (ndlist(ind).EQ.indg) THEN
-              IF (ll.EQ.l1) THEN
-                IF (reg(1)%merged(ll,kk)) THEN
-                ELSE
-                  icount=icount+1_ink
-                  ndx(icount)=reg(1)%ss(ll,kk)
-                  ndy(icount)=reg(1)%rr(ll,kk)
-                  IF (reg(1)%bc(ll,kk).GT.0_ink) THEN
-                    indtype(icount)=-reg(1)%bc(ll,kk)
-                    istore(icount)=1_ink
-                  ELSE
-                    error%ierr=FAILURE
-                    error%iout=HALT_SINGLE
-                    error%serr='ERROR: undefined BC at mesh edge'
-                    RETURN
-                  ENDIF
-                ENDIF
-              ELSEIF (ll.EQ.l2) THEN
-                IF (reg(1)%merged(ll,kk)) THEN
-                ELSE
-                  icount=icount+1_ink
-                  ndx(icount)=reg(1)%ss(ll,kk)
-                  ndy(icount)=reg(1)%rr(ll,kk)
-                  IF (reg(1)%bc(ll,kk).GT.0_ink) THEN
-                    indtype(icount)=-reg(1)%bc(ll,kk)
-                    istore(icount)=1_ink
-                  ELSE
-                    error%ierr=FAILURE
-                    error%iout=HALT_SINGLE
-                    error%serr='ERROR: undefined BC at mesh edge'
-                    RETURN
-                  ENDIF
-                ENDIF
-              ELSEIF (kk.EQ.k1) THEN
-                IF (reg(1)%merged(ll,kk)) THEN
-                ELSE
-                  icount=icount+1_ink
-                  ndx(icount)=reg(1)%ss(ll,kk)
-                  ndy(icount)=reg(1)%rr(ll,kk)
-                  IF (reg(1)%bc(ll,kk).GT.0_ink) THEN
-                    indtype(icount)=-reg(1)%bc(ll,kk)
-                    istore(icount)=1_ink
-                  ELSE
-                    error%ierr=FAILURE
-                    error%iout=HALT_SINGLE
-                    error%serr='ERROR: undefined BC at mesh edge'
-                    RETURN
-                  ENDIF
-                ENDIF
-              ELSEIF (kk.EQ.k2) THEN
-                IF (reg(1)%merged(ll,kk)) THEN
-                ELSE
-                  icount=icount+1_ink
-                  ndx(icount)=reg(1)%ss(ll,kk)
-                  ndy(icount)=reg(1)%rr(ll,kk)
-                  IF (reg(1)%bc(ll,kk).GT.0_ink) THEN
-                    indtype(icount)=-reg(1)%bc(ll,kk)
-                    istore(icount)=1_ink
-                  ELSE
-                    error%ierr=FAILURE
-                    error%iout=HALT_SINGLE
-                    error%serr='ERROR: undefined BC at mesh edge'
-                    RETURN
-                  ENDIF
-                ENDIF
+          iindx=utils_kn_binary_search(ndlist, indg)
+          zpresent=iindx.NE.-1_ink
+          IF (zpresent) THEN
+            IF (ll.EQ.l1) THEN
+              IF (reg(1)%merged(ll,kk)) THEN
               ELSE
                 icount=icount+1_ink
                 ndx(icount)=reg(1)%ss(ll,kk)
                 ndy(icount)=reg(1)%rr(ll,kk)
-                indtype(icount)=1_ink
+                IF (reg(1)%bc(ll,kk).GT.0_ink) THEN
+                  indtype(icount)=-reg(1)%bc(ll,kk)
+                  istore(icount)=1_ink
+                ELSE
+                  error%ierr=FAILURE
+                  error%iout=HALT_SINGLE
+                  error%serr='ERROR: undefined BC at mesh edge'
+                  RETURN
+                ENDIF
               ENDIF
+            ELSEIF (ll.EQ.l2) THEN
+              IF (reg(1)%merged(ll,kk)) THEN
+              ELSE
+                icount=icount+1_ink
+                ndx(icount)=reg(1)%ss(ll,kk)
+                ndy(icount)=reg(1)%rr(ll,kk)
+                IF (reg(1)%bc(ll,kk).GT.0_ink) THEN
+                  indtype(icount)=-reg(1)%bc(ll,kk)
+                  istore(icount)=1_ink
+                ELSE
+                  error%ierr=FAILURE
+                  error%iout=HALT_SINGLE
+                  error%serr='ERROR: undefined BC at mesh edge'
+                  RETURN
+                ENDIF
+              ENDIF
+            ELSEIF (kk.EQ.k1) THEN
+              IF (reg(1)%merged(ll,kk)) THEN
+              ELSE
+                icount=icount+1_ink
+                ndx(icount)=reg(1)%ss(ll,kk)
+                ndy(icount)=reg(1)%rr(ll,kk)
+                IF (reg(1)%bc(ll,kk).GT.0_ink) THEN
+                  indtype(icount)=-reg(1)%bc(ll,kk)
+                  istore(icount)=1_ink
+                ELSE
+                  error%ierr=FAILURE
+                  error%iout=HALT_SINGLE
+                  error%serr='ERROR: undefined BC at mesh edge'
+                  RETURN
+                ENDIF
+              ENDIF
+            ELSEIF (kk.EQ.k2) THEN
+              IF (reg(1)%merged(ll,kk)) THEN
+              ELSE
+                icount=icount+1_ink
+                ndx(icount)=reg(1)%ss(ll,kk)
+                ndy(icount)=reg(1)%rr(ll,kk)
+                IF (reg(1)%bc(ll,kk).GT.0_ink) THEN
+                  indtype(icount)=-reg(1)%bc(ll,kk)
+                  istore(icount)=1_ink
+                ELSE
+                  error%ierr=FAILURE
+                  error%iout=HALT_SINGLE
+                  error%serr='ERROR: undefined BC at mesh edge'
+                  RETURN
+                ENDIF
+              ENDIF
+            ELSE
+              icount=icount+1_ink
+              ndx(icount)=reg(1)%ss(ll,kk)
+              ndy(icount)=reg(1)%rr(ll,kk)
+              indtype(icount)=1_ink
             ENDIF
-          ENDDO
+          ENDIF
         ENDDO
       ENDDO
     ENDIF

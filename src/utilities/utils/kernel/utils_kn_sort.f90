@@ -23,7 +23,7 @@ MODULE utils_kn_sort_mod
 
   PUBLIC  :: utils_kn_sort,utils_kn_arth,utils_kn_sortwrapper,                 &
 &            utils_kn_arthwrapper,utils_kn_sort0,utils_kn_sort1,               &
-&            utils_kn_iusort
+&            utils_kn_iusort,utils_kn_binary_search
   PRIVATE :: utils_kn_quicksort,utils_kn_iquicksort,                           &
 &            utils_kn_indexr,utils_kn_indexi,utils_kn_sort0ir1,                &
 &            utils_kn_sort0ir2,utils_kn_sort0ir1rr2,                           &
@@ -43,6 +43,44 @@ MODULE utils_kn_sort_mod
   END INTERFACE utils_kn_sort1
 
 CONTAINS
+
+  PURE FUNCTION utils_kn_binary_search(iarr, ival) RESULT(iindx)
+      INTEGER(KIND=ink), DIMENSION(:), INTENT(IN) :: iarr
+      INTEGER(KIND=ink),               INTENT(IN) :: ival
+      INTEGER(KIND=ink)                           :: iindx
+      INTEGER(KIND=ink)                           :: ilen,ipvt,iupp,ilow,icur,ii
+      INTEGER(KIND=ink), PARAMETER                :: ICUTOFF = 10
+
+      ilen=SIZE(iarr)
+      iupp=ilen
+      ilow=1_ink
+
+      DO
+        ! do a linear search when we hit the cutoff
+        IF ((iupp-ilow+1).LE.ICUTOFF) THEN
+            DO ii=ilow,iupp
+                IF (iarr(ii).EQ.ival) THEN
+                    iindx=ii
+                    RETURN
+                ENDIF
+            ENDDO
+            EXIT
+        ENDIF
+
+        ipvt=(iupp+ilow)/2_ink
+        icur=iarr(ipvt)
+        IF (icur.EQ.ival) THEN
+            iindx=ipvt
+            RETURN
+        ELSE IF (ival.LT.icur) THEN
+            iupp=ipvt-1
+        ELSE
+            ilow=ipvt+1
+        ENDIF
+      ENDDO
+
+      iindx = -1_ink
+  END FUNCTION
 
   SUBROUTINE utils_kn_sortwrapper(n,ilist,isort)
 
