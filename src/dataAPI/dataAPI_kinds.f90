@@ -18,9 +18,9 @@
 MODULE dataAPI_kinds_mod
 
   USE, INTRINSIC :: iso_c_binding,  ONLY: C_BOOL
-  USE, INTRINSIC :: iso_fortran_env,ONLY: REAL64,INT32
+  USE, INTRINSIC :: iso_fortran_env,ONLY: REAL64,INT32,INT64
 
-  INTEGER,PARAMETER,PUBLIC :: ink=INT32,lok=INT32,lak=C_BOOL,rlk=REAL64
+  INTEGER,PARAMETER,PUBLIC :: ink=INT32,ilk=INT64,lok=INT32,lak=C_BOOL,rlk=REAL64
 
 END MODULE dataAPI_kinds_mod
 

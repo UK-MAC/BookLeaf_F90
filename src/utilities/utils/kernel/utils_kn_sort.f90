@@ -17,7 +17,7 @@
 ! @HEADER@
 MODULE utils_kn_sort_mod
 
-  USE dataAPI_kinds_mod,ONLY: ink,rlk,lok
+  USE dataAPI_kinds_mod,ONLY: ink,ilk,rlk,lok
 
   IMPLICIT NONE
 
@@ -26,12 +26,13 @@ MODULE utils_kn_sort_mod
 &            utils_kn_iusort,utils_kn_binary_search
   PRIVATE :: utils_kn_quicksort,utils_kn_iquicksort,                           &
 &            utils_kn_indexr,utils_kn_indexi,utils_kn_sort0ir1,                &
+&            utils_kn_indexl,                                                  &
 &            utils_kn_sort0ir2,utils_kn_sort0ir1rr2,                           &
 &            utils_kn_sort1ir2perm,utils_kn_sort1ir2,                          &
 &            utils_kn_sort1rr2
 
   INTERFACE utils_kn_sort
-    MODULE PROCEDURE utils_kn_quicksort,utils_kn_iquicksort
+    MODULE PROCEDURE utils_kn_quicksort,utils_kn_iquicksort,utils_kn_lquicksort
   END INTERFACE utils_kn_sort
 
   INTERFACE utils_kn_sort0
@@ -172,6 +173,25 @@ CONTAINS
     slave=slave(index1)
 
   END FUNCTION utils_kn_iquicksort
+
+  PURE FUNCTION utils_kn_lquicksort(arr) RESULT(slave)
+
+    ! Argument list
+    INTEGER(KIND=ilk),DIMENSION(:),INTENT(IN) :: arr
+    ! Result    
+    INTEGER(KIND=ink),DIMENSION(SIZE(arr))    :: slave
+    ! Local
+    INTEGER(KIND=ink),DIMENSION(SIZE(arr))    :: index1
+
+    index1=utils_kn_indexl(arr)
+    IF (index1(1).EQ.-HUGE(1_ink)) THEN
+      slave(1)=-HUGE(1_ink)
+      RETURN
+    ENDIF
+    slave=utils_kn_arth(1_ink,1_ink,SIZE(arr))
+    slave=slave(index1)
+
+  END FUNCTION utils_kn_lquicksort
 
   PURE FUNCTION utils_kn_indexr(arr) RESULT(index1)
      
@@ -368,6 +388,104 @@ CONTAINS
     ENDDO
 
   END FUNCTION utils_kn_indexi
+
+  PURE FUNCTION utils_kn_indexl(arr) RESULT(index1)
+
+    ! Argument list
+    INTEGER(KIND=ilk),DIMENSION(:),        INTENT(in) :: arr
+    ! Result    
+    INTEGER(KIND=ink),DIMENSION(SIZE(arr)),TARGET     :: index1
+    ! Local
+    INTEGER(KIND=ilk)                   :: a
+    INTEGER(KIND=ink),PARAMETER         :: nn=7_ink,nstack=500_ink
+    INTEGER(KIND=ink)                   :: n,k,i,j,indext,jstack,l,r,sw,swap
+    INTEGER(KIND=ink),POINTER           :: p1,p2,p3
+    INTEGER(KIND=ink),DIMENSION(nstack) :: istack
+
+    n=SIZE(arr)
+    index1=utils_kn_arth(1_ink,1_ink,n)
+    jstack=0_ink
+    l=1_ink
+    r=n
+    p1=>NULL()
+    p2=>NULL()
+    p3=>NULL()
+    DO
+      IF (r-l.LT.nn) THEN
+        DO j=l+1,r
+          indext=index1(j)
+          a=arr(indext)
+          DO i=j-1,l,-1
+            IF (arr(index1(i)).le.a) EXIT
+            index1(i+1)=index1(i)
+          ENDDO
+          index1(i+1)=indext
+        ENDDO
+        IF (jstack.eq.0_ink) RETURN
+        r=istack(jstack)
+        l=istack(jstack-1)
+        jstack=jstack-2_ink
+      ELSE
+        k=(l+r)/2_ink
+        swap=index1(k)
+        index1(k)=index1(l+1)
+        index1(l+1)=swap
+        p1=>index1(l)
+        p2=>index1(r)
+        p3=>index1(l+1)
+        IF (arr(p2).LT.arr(p1)) THEN
+          sw=p1
+          p1=p2
+          p2=sw
+        ENDIF
+        IF (arr(p2).LT.arr(p3)) THEN
+          sw=p3
+          p3=p2
+          p2=sw
+        ENDIF
+        IF (arr(p3).LT.arr(p1)) THEN
+          sw=p1
+          p1=p3
+          p3=sw
+        ENDIF
+        i=l+1_ink
+        j=r
+        indext=index1(l+1)
+        a=arr(indext)
+        DO
+          DO
+            i=i+1_ink
+            IF (arr(index1(i)).ge.a) EXIT
+          ENDDO
+          DO
+            j=j-1_ink
+            IF (arr(index1(j)).le.a) EXIT
+          ENDDO
+          IF (j.LT.i) EXIT
+          swap=index1(i)
+          index1(i)=index1(j)
+          index1(j)=swap
+        ENDDO
+        index1(l+1)=index1(j)
+        index1(j)=indext
+        jstack=jstack+2_ink
+        IF (jstack.gt.nstack) THEN
+          index1(1)=-HUGE(1_ink)
+          RETURN
+        ENDIF
+        IF (r-i+1.ge.j-1) THEN
+          istack(jstack)=r
+          istack(jstack-1)=i
+          r=j-1_ink
+        ELSE
+          istack(jstack)=j-1_ink
+          istack(jstack-1)=l
+          l=i
+        ENDIF
+      ENDIF
+    ENDDO
+
+  END FUNCTION utils_kn_indexl
 
   SUBROUTINE utils_kn_sort1ir2(iarray,icol)
 

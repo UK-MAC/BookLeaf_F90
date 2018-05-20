@@ -17,7 +17,7 @@
 ! @HEADER@
 MODULE utils_kn_connectivity_mod
 
-  USE dataAPI_kinds_mod, ONLY: ink
+  USE dataAPI_kinds_mod, ONLY: ink,ilk
   USE dataAPI_params_mod,ONLY: NFACE,NCORN
   USE utils_kn_sort_mod, ONLY: utils_kn_sort,utils_kn_arth
 
@@ -35,10 +35,10 @@ CONTAINS
     ! result
     INTEGER(KIND=ink),DIMENSION(NFACE,nCell)            :: e2e
     ! local
-    INTEGER(KIND=ink)                                   :: i1,i2,i3,i4,i5,i6,  &
-&                                                          nSz
-    INTEGER(KIND=ink),DIMENSION(nCell*NFACE)            :: iConn,iUind,iWork1, &
-&                                                          iWork2
+    INTEGER(KIND=ink)                                   :: nSz,i1,i2,i3,i4,i5,i6
+    INTEGER(KIND=ink),DIMENSION(nCell*NFACE)            :: iConn,iWork1,iWork2, &
+                                                           iWork3
+    INTEGER(KIND=ilk),DIMENSION(nCell*NFACE)            :: iUind
 
     ! initialise
     e2e=0_ink
@@ -72,12 +72,12 @@ CONTAINS
       i6=iWork2(i1)
       i2=MAX(i5,i6)
       i3=MIN(i5,i6)-1_ink
-      iUind(i1)=i3*i4+i2
+      iUind(i1)=INT(i3, KIND=ilk) * INT(i4, KIND=ilk) + INT(i2, KIND=ilk)
     ENDDO
 
     ! sort unique index
     iWork1=utils_kn_sort(iUind)
-    IF (iWork1(1).EQ.-HUGE(1_ink)) THEN
+    IF (iWork1(1).EQ.-HUGE(1_ilk)) THEN
       e2e(1,1)=-HUGE(1_ink)
       RETURN
     ENDIF
@@ -94,15 +94,15 @@ CONTAINS
     ENDDO
 
     ! insert matches into connectivity table
-    iUind=utils_kn_arth(1_ink,1_ink,nSz)
-    iUind=iUind(iWork1)
+    iWork3=utils_kn_arth(1_ink,1_ink,nSz)
+    iWork3=iWork3(iWork1)
     iConn=iConn(iWork1)
     iWork1=0_ink
     DO i1=1,i2
       i3=iWork2(i1)
       i4=i3+1_ink
-      iWork1(iUind(i3))=iConn(i4)
-      iWork1(iUind(i4))=iConn(i3)
+      iWork1(iWork3(i3))=iConn(i4)
+      iWork1(iWork3(i4))=iConn(i3)
     ENDDO
 
     ! copy to result
@@ -110,7 +110,7 @@ CONTAINS
     DO i1=1,nFace
       DO i3=1,nCell
         i4=i4+1_ink
-        e2e(i1,i3)=iWork1(i4)
+        e2e(i1,i3)=INT(iWork1(i4), KIND=ink)
       ENDDO
     ENDDO
 

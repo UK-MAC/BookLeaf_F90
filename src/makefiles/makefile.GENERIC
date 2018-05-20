@@ -3,9 +3,9 @@ MAKE    = gmake
 
 # Silo library location
 ifneq ($(SILO),)
-  SILODIR = /usr/local/silo
+  SILODIR = /usr
   SILOINC = -I$(SILODIR)/include
-  SILOLIB = -L$(SILODIR)/lib -lsiloh5
+  SILOLIB = -L$(SILODIR)/lib/x86_64-linux-gnu -lsiloh5
 endif
 
 # TyphonIO library location
@@ -17,9 +17,9 @@ endif
 
 # Auxilary library locations
 ifneq ($(SILO)$(TIO),)
-  HDF5DIR = /usr/local/hdf5
-  HDF5INC = -I$(HDF5DIR)/include
-  HDF5LIB = -L$(HDF5DIR)/lib -lhdf5_fortran -lhdf5
+  HDF5DIR = /usr
+  HDF5INC = -I$(HDF5DIR)/include/hdf5
+  HDF5LIB = -L$(HDF5DIR)/lib/x86_64-linux-gnu/hdf5/serial -lhdf5_fortran -lhdf5
   ZLIB    = -L$(COM_PATH_S)/external/zli$(ZLIB_VER)/lib64 -lz
 endif
 
