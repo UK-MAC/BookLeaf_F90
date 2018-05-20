@@ -65,7 +65,7 @@ MODULE setup_IC_mod
 
   TYPE,PRIVATE :: shape_t
     INTEGER(KIND=ink)              :: itype
-    REAL(KIND=rlk),   DIMENSION(4) :: param
+    REAL(KIND=rlk),   DIMENSION(5) :: param
   END TYPE shape_t
 
   TYPE(indicator_t),DIMENSION(:),ALLOCATABLE,SAVE,PRIVATE :: materials,regions
@@ -1128,7 +1128,7 @@ CONTAINS
     TYPE(error_t),    INTENT(OUT) :: error
     ! Local
     CHARACTER(LEN=SLEN),DIMENSION(LN)   :: shape_type
-    REAL(KIND=rlk),     DIMENSION(LN,4) :: shape_param
+    REAL(KIND=rlk),     DIMENSION(LN,5) :: shape_param
     CHARACTER(LEN=SLEN)                 :: str
     LOGICAL(KIND=lok)                   :: zflag
     INTEGER(KIND=ink)                   :: ii,is
@@ -1178,6 +1178,12 @@ CONTAINS
           error%serr="ERROR: unrecognised shape type"
           RETURN
       END SELECT
+      IF ((shape_param(ii,5).LT.0.0_rlk).OR.                                   &
+&         (shape_param(ii,5).GT.1.0_rlk)) THEN
+        error%ierr=FAILURE
+        error%serr="ERROR: shape fixed fraction < 0 or > 1"
+        RETURN
+      ENDIF
     ENDDO
 
     ! set type
@@ -1537,6 +1543,10 @@ CONTAINS
 &        '    Circle: centre = (',forms(ishape)%param(1),',',                  &
 &        forms(ishape)%param(2),') radius = ',forms(ishape)%param(3)
     END SELECT
+    IF (forms(ishape)%param(5).GT.0.0_rlk) THEN
+      WRITE(OSTREAM,'(a43,f16.10)') '      Fixed user defined volume fraction '&
+&      //'= ',forms(ishape)%param(5)
+    ENDIF
 
   END SUBROUTINE setup_print_shape
 
@@ -1544,7 +1554,7 @@ CONTAINS
 
     ! Argument list
     INTEGER(KIND=ink),             INTENT(IN)    :: itarget,iflagid
-    REAL(KIND=rlk),   DIMENSION(4),INTENT(IN)    :: param
+    REAL(KIND=rlk),   DIMENSION(5),INTENT(IN)    :: param
     TYPE(sizes_t),                 INTENT(INOUT) :: sizes   
     TYPE(data_t),     DIMENSION(:),INTENT(INOUT) :: dh
     TYPE(error_t),                 INTENT(OUT)   :: error
@@ -1576,7 +1586,7 @@ CONTAINS
 
     ! Argument list
     INTEGER(KIND=ink),             INTENT(IN)    :: itarget,iflagid
-    REAL(KIND=rlk),   DIMENSION(4),INTENT(IN)    :: param
+    REAL(KIND=rlk),   DIMENSION(5),INTENT(IN)    :: param
     TYPE(sizes_t),                 INTENT(INOUT) :: sizes
     TYPE(data_t),     DIMENSION(:),INTENT(INOUT) :: dh
     TYPE(error_t),                 INTENT(OUT)   :: error
@@ -1596,11 +1606,15 @@ CONTAINS
         xx(jj)=utils_kn_get(kk,4_ink*sizes%nel,dh(cnxid)%raddr)
         yy(jj)=utils_kn_get(kk,4_ink*sizes%nel,dh(cnyid)%raddr)
       ENDDO
-      vf=intersect(param,xx(:),yy(:))
+      vf=intersect(param(1:4),xx(:),yy(:))
       IF (vf.GT.0.75_rlk) THEN
         CALL utils_kn_set(ii,sizes%nel,itarget,dh(iflagid)%iaddr)
       ELSEIF (vf.GT.0.25_rlk) THEN
-        vf=subdivide(0_ink,param,xx(:),yy(:))
+        IF (param(5).GT.0.0_rlk) THEN
+          vf=param(5)
+        ELSE
+          vf=subdivide(0_ink,param(1:4),xx(:),yy(:))
+        ENDIF
         jj=utils_kn_get(ii,sizes%nel,dh(iflagid)%iaddr)
         IF (jj.GT.0_ink) THEN
           ll=jj

@@ -36,7 +36,7 @@ MODULE hydro_dr_print_mod
 &                               hydro_kn_write_table_shortprint,               &
 &                               hydro_kn_write_total_shortprint,               &
 &                               hydro_kn_longprint
-  USE utils_kn_gather_mod,ONLY: utils_kn_cngather,utils_kn_mxgather
+  USE utils_kn_gather_mod,ONLY: utils_kn_cngather,utils_kn_mxgathercn
   USE typhon_API_mod,     ONLY: TYPH_reduce,TYPH_OP_SUM,TYPH_OP_MIN,TYPH_OP_MAX
 
   IMPLICIT NONE
@@ -94,18 +94,18 @@ CONTAINS
 &                                 mat_mass,mat_ke,mat_ie,mat_dmn,mat_dmx,      &
 &                                 mat_pre,mat_pmn,mat_pmx)
     IF (runtime%sizes%ncp.GT.0_ink) THEN
-      CALL utils_kn_mxgather(runtime%sizes%nel,runtime%sizes%nmx,              &
-&                            runtime%sizes%ncp,dh(imxelid)%iaddr,              &
-&                            dh(imxfcpid)%iaddr,dh(imxncpid)%iaddr,            &
-&                            dh(cnwtid)%raddr,dh(cpwtid)%raddr)
-      CALL utils_kn_mxgather(runtime%sizes%nel,runtime%sizes%nmx,              &
-&                            runtime%sizes%ncp,dh(imxelid)%iaddr,              &
-&                            dh(imxfcpid)%iaddr,dh(imxncpid)%iaddr,            &
-&                            dh(cnuid)%raddr,dh(cpuid)%raddr)
-      CALL utils_kn_mxgather(runtime%sizes%nel,runtime%sizes%nmx,              &
-&                            runtime%sizes%ncp,dh(imxelid)%iaddr,              &
-&                            dh(imxfcpid)%iaddr,dh(imxncpid)%iaddr,            &
-&                            dh(cnvid)%raddr,dh(cpvid)%raddr)
+      CALL utils_kn_mxgathercn(runtime%sizes%nel,runtime%sizes%nmx,            &
+&                              runtime%sizes%ncp,dh(imxelid)%iaddr,            &
+&                              dh(imxfcpid)%iaddr,dh(imxncpid)%iaddr,          &
+&                              dh(cnwtid)%raddr,dh(cpwtid)%raddr)
+      CALL utils_kn_mxgathercn(runtime%sizes%nel,runtime%sizes%nmx,            &
+&                              runtime%sizes%ncp,dh(imxelid)%iaddr,            &
+&                              dh(imxfcpid)%iaddr,dh(imxncpid)%iaddr,          &
+&                              dh(cnuid)%raddr,dh(cpuid)%raddr)
+      CALL utils_kn_mxgathercn(runtime%sizes%nel,runtime%sizes%nmx,            &
+&                              runtime%sizes%ncp,dh(imxelid)%iaddr,            &
+&                              dh(imxfcpid)%iaddr,dh(imxncpid)%iaddr,          &
+&                              dh(cnvid)%raddr,dh(cpvid)%raddr)
       CALL hydro_kn_calc_shortprint(runtime%sizes%nmat,runtime%sizes%ncp,      &
 &                                   hydro%global%dencut,dh(icpmatid)%iaddr,    &
 &                                   dh(cpdensityid)%raddr,dh(cpenergyid)%raddr,&

@@ -29,15 +29,16 @@ MODULE utils_dr_sort_mod
 
 CONTAINS
 
-  SUBROUTINE utils_dr_sortwrapper(ilist,isort,error)
+  SUBROUTINE utils_dr_sortwrapper(nsize,ilist,isort,error)
 
     ! Argument list
+    INTEGER(KIND=ink),INTENT(IN)  :: nsize
     TYPE(data_t),     INTENT(IN)  :: ilist
     TYPE(data_t),     INTENT(OUT) :: isort
     TYPE(error_t),    INTENT(OUT) :: error
 
     error%ierr=SUCCESS
-    CALL utils_kn_sortwrapper(ilist%dsize,ilist%iaddr,isort%iaddr)
+    CALL utils_kn_sortwrapper(nsize,ilist%iaddr,isort%iaddr)
     IF (utils_kn_get(1,1,isort%iaddr).EQ.-HUGE(1_ink)) THEN
       error%ierr=FAILURE
       error%iout=HALT_SINGLE

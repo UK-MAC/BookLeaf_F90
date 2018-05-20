@@ -23,11 +23,11 @@ MODULE utils_kn_gather_mod
   IMPLICIT NONE
 
   INTERFACE utils_kn_mxgather
-    MODULE PROCEDURE utils_kn_mxgather1,utils_kn_mxgather4,utils_kn_mxgathercn
+    MODULE PROCEDURE utils_kn_mxgather1,utils_kn_mxgather4
   END INTERFACE utils_kn_mxgather
 
-  PRIVATE :: utils_kn_mxgather1,utils_kn_mxgather4,utils_kn_mxgathercn
-  PUBLIC  :: utils_kn_mxgather,utils_kn_cngather
+  PRIVATE :: utils_kn_mxgather1,utils_kn_mxgather4
+  PUBLIC  :: utils_kn_mxgather,utils_kn_cngather,utils_kn_mxgathercn
 
 CONTAINS
 
