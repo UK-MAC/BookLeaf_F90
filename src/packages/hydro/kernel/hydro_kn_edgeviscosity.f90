@@ -23,7 +23,7 @@ MODULE hydro_kn_edgeviscosity_mod
   IMPLICIT NONE
 
   PUBLIC :: hydro_kn_initeviscosity,hydro_kn_limiteviscosity,                  &
-&           hydro_kn_geteviscosity
+&           hydro_kn_geteviscosity,hydro_kn_getcpeviscosity
 
 CONTAINS
 
@@ -280,5 +280,32 @@ CONTAINS
     ENDDO
 
   END SUBROUTINE hydro_kn_geteviscosity
+
+  SUBROUTINE hydro_kn_getcpeviscosity(ncp,cvisc1,cvisc2,cpdensity,cpcs2,phi,   &
+&                                     cpvisc)
+
+    ! Argument list
+    INTEGER(KIND=ink),                     INTENT(IN)  :: ncp
+    REAL(KIND=rlk),                        INTENT(IN)  :: cvisc1,cvisc2
+    REAL(KIND=rlk),   DIMENSION(ncp),      INTENT(IN)  :: cpdensity,cpcs2
+    REAL(KIND=rlk),   DIMENSION(NFACE,ncp),INTENT(IN)  :: phi
+    REAL(KIND=rlk),   DIMENSION(ncp),      INTENT(OUT) :: cpvisc
+    ! Local
+    INTEGER(KIND=ink) :: icp,iside
+    REAL(KIND=rlk)    :: w1,w2
+
+!    DO icp=1,ncp
+!      cpvisc(icp)=0.0_rlk
+!      DO iside=1,NFACE
+!        w1=(1.0_rlk-phi(iside,icp))*cpdensity(icp)*(cvisc1*SQRT(cpcs2(icp))+   &
+!&                                                   cvisc2*)
+!        edviscx(iside)=w1
+!        edviscy(iside)=w1
+!        w2=2.0_rlk*/MAX(cpdensity(icp),zerocut)
+!        cpvisc(icp)=MAX(cpvisc(icp),w1*w2)
+!      ENDDO
+!    ENDDO
+
+  END SUBROUTINE hydro_kn_getcpeviscosity
 
 END MODULE hydro_kn_edgeviscosity_mod

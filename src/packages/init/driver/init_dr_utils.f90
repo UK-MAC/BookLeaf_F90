@@ -30,7 +30,7 @@ MODULE init_dr_utils_mod
   USE eos_cf_mod,            ONLY: eos_cf_defaults
   USE io_cf_mod,             ONLY: io_cf_defaults
   USE global_cf_mod,         ONLY: global_cf_defaults
-  USE utils_kn_sort_mod,     ONLY: utils_kn_sortwrapper
+  USE utils_dr_sort_mod,     ONLY: utils_dr_sortwrapper
   USE utils_kn_sort_mod,     ONLY: utils_kn_arthwrapper
   USE utils_kn_gather_mod,   ONLY: utils_kn_mxgather
   USE utils_kn_math_mod,     ONLY: utils_kn_divide
@@ -53,10 +53,12 @@ CONTAINS
 
     ! initialise mis-direction
     IF (config%comm%spatial%nproc.GT.1_ink) THEN
-      CALL utils_kn_sortwrapper(sizes%nel1,dh(iellocglobid)%iaddr,dh(ielsort1id)%iaddr)
+      CALL utils_dr_sortwrapper(sizes%nel1,dh(iellocglobid),dh(ielsort1id),    &
+&                               error)
       IF (error%ierr.NE.SUCCESS) RETURN
       IF (config%ale%zexist) THEN
-        CALL utils_kn_sortwrapper(sizes%nel2,dh(iellocglobid)%iaddr,dh(ielsort2id)%iaddr)
+        CALL utils_dr_sortwrapper(sizes%nel2,dh(iellocglobid),dh(ielsort2id),  &
+&                                 error)
         IF (error%ierr.NE.SUCCESS) RETURN
       ENDIF
     ELSE

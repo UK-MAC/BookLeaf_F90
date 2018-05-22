@@ -28,7 +28,7 @@ endif
 ifeq ($(LEV),DEBUG)
   OPT     = -O
   COPT    = -O
-  DBG     = -g -Wunused -Wuninitialized -fbacktrace -ffpe-trap=invail,zero
+  DBG     = -g -Wunused -Wuninitialized -fbacktrace -ffpe-trap=invalid,zero
   CDBG    = -g -Wunused -Wuninitialized
 endif
 ifeq ($(LEV),TV)
