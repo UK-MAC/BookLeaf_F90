@@ -47,4 +47,5 @@ which problem you wish to run.
 
 ## Release history
 
+* 23/05/2018, version 2.0.1
 * 02/05/2018, version 2.0
