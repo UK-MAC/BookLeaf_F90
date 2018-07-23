@@ -15,6 +15,7 @@
 ! You should have received a copy of the GNU General Public License along with
 ! BookLeaf. If not, see http://www.gnu.org/licenses/.
 ! @HEADER@
+MODULE TYPH_dt_reduce_mod
 
   USE dataAPI_types_mod, ONLY: dt_t
   USE TYPH_Types_mod
