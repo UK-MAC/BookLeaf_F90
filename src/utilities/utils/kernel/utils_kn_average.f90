@@ -71,6 +71,7 @@ CONTAINS
       DO ii=1,imxncp(imx)
         w1(1:NCORN)=w1(1:NCORN)+mxfraction(icp)*mxarray1(1:NCORN,icp)
         w2(1:NCORN)=w2(1:NCORN)+mxfraction(icp)*mxarray2(1:NCORN,icp)
+        icp=icp+1_ink
       ENDDO
       iel=imxel(imx)
       elarray1(1:NCORN,iel)=w1(1:NCORN)
@@ -97,6 +98,7 @@ CONTAINS
       icp=imxcp(imx)
       DO ii=1,imxncp(imx)
         w1=w1+mxfraction(icp)*(mxarray1(icp)+mxarray2(icp))
+        icp=icp+1_ink
       ENDDO
       iel=imxel(imx)
       elarray(iel)=w1

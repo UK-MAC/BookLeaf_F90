@@ -27,7 +27,8 @@ MODULE utils_kn_gather_mod
   END INTERFACE utils_kn_mxgather
 
   PRIVATE :: utils_kn_mxgather1,utils_kn_mxgather4
-  PUBLIC  :: utils_kn_mxgather,utils_kn_cngather,utils_kn_mxgathercn
+  PUBLIC  :: utils_kn_mxgather,utils_kn_cngather,utils_kn_mxgathercncp,        &
+&            utils_kn_mxgathercnav
 
 CONTAINS
 
@@ -105,8 +106,8 @@ CONTAINS
 
   END SUBROUTINE utils_kn_mxgather4
 
-  SUBROUTINE utils_kn_mxgathercn(nel,nmx,ncp,imxel,imxfcp,imxncp,elarray,      &
-&                                mxarray)
+  SUBROUTINE utils_kn_mxgathercncp(nel,nmx,ncp,imxel,imxfcp,imxncp,elarray,    &
+&                                  mxarray)
 
     ! Argument list
     INTEGER(KIND=ink),                     INTENT(IN)  :: nel,nmx,ncp
@@ -126,6 +127,30 @@ CONTAINS
       ENDDO
     ENDDO
 
-  END SUBROUTINE utils_kn_mxgathercn
+  END SUBROUTINE utils_kn_mxgathercncp
+
+  SUBROUTINE utils_kn_mxgathercnav(nel,nmx,ncp,imxel,imxfcp,imxncp,elarray,    &
+&                                  mxfraction,mxarray) 
+
+    ! Argument list
+    INTEGER(KIND=ink),                     INTENT(IN)  :: nel,nmx,ncp
+    INTEGER(KIND=ink),DIMENSION(nmx),      INTENT(IN)  :: imxel,imxfcp,imxncp
+    REAL(KIND=rlk),   DIMENSION(NCORN,nel),INTENT(IN)  :: elarray
+    REAL(KIND=rlk),   DIMENSION(ncp),      INTENT(IN)  :: mxfraction
+    REAL(KIND=rlk),   DIMENSION(NCORN,ncp),INTENT(OUT) :: mxarray
+    ! Local
+    INTEGER(KIND=ink)                  :: imx,icp,ii
+    REAL(KIND=rlk),   DIMENSION(NCORN) :: w1
+
+    DO imx=1,nmx
+      w1(:)=elarray(:,imxel(imx))
+      icp=imxfcp(imx)
+      DO ii=1,imxncp(imx)
+        mxarray(:,icp)=mxfraction(icp)*w1(:)
+        icp=icp+1_ink
+      ENDDO
+    ENDDO
+
+  END SUBROUTINE utils_kn_mxgathercnav
 
 END MODULE utils_kn_gather_mod

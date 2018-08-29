@@ -20,11 +20,11 @@ MODULE hydro_dr_getenergy_mod
   USE dataAPI_kinds_mod,     ONLY: ink
   USE dataAPI_types_mod,     ONLY: hydro_t,runtime_t,data_t
   USE dataAPI_id_mod,        ONLY: elenergyid,elmassid,cpenergyid,cpmassid,    &
-&                                  imxelid,imxfcpid,imxncpid
+&                                  imxelid,imxfcpid,imxncpid,frvolumeid
   USE dataAPI_lagstepid_mod, ONLY: cnfxid,cnfyid,cnuid,cnvid,cpfxid,cpfyid,    &
 &                                  cpuid,cpvid
   USE hydro_kn_getenergy_mod,ONLY: hydro_kn_getenergy
-  USE utils_kn_gather_mod,   ONLY: utils_kn_mxgathercn
+  USE utils_kn_gather_mod,   ONLY: utils_kn_mxgathercnav
 
   IMPLICIT NONE
 
@@ -45,14 +45,16 @@ CONTAINS
 &                           dh(elmassid)%raddr,dh(cnfxid)%raddr,               &
 &                           dh(cnfyid)%raddr,dh(cnuid)%raddr,dh(cnvid)%raddr)
     IF (runtime%sizes%ncp.GT.0_ink) THEN
-      CALL utils_kn_mxgathercn(runtime%sizes%nel,runtime%sizes%nmx,            &
-&                              runtime%sizes%ncp,dh(imxelid)%iaddr,            &
-&                              dh(imxfcpid)%iaddr,dh(imxncpid)%iaddr,          &
-&                              dh(cnuid)%raddr,dh(cpuid)%raddr)
-      CALL utils_kn_mxgathercn(runtime%sizes%nel,runtime%sizes%nmx,            &
-&                              runtime%sizes%ncp,dh(imxelid)%iaddr,            &
-&                              dh(imxfcpid)%iaddr,dh(imxncpid)%iaddr,          &
-&                              dh(cnvid)%raddr,dh(cpvid)%raddr)
+      CALL utils_kn_mxgathercnav(runtime%sizes%nel,runtime%sizes%nmx,          &
+&                                runtime%sizes%ncp,dh(imxelid)%iaddr,          &
+&                                dh(imxfcpid)%iaddr,dh(imxncpid)%iaddr,        &
+&                                dh(cnuid)%raddr,dh(frvolumeid)%raddr,         &
+&                                dh(cpuid)%raddr)
+      CALL utils_kn_mxgathercnav(runtime%sizes%nel,runtime%sizes%nmx,          &
+&                                runtime%sizes%ncp,dh(imxelid)%iaddr,          &
+&                                dh(imxfcpid)%iaddr,dh(imxncpid)%iaddr,        &
+&                                dh(cnvid)%raddr,dh(frvolumeid)%raddr,         &
+&                                dh(cpvid)%raddr)
       CALL hydro_kn_getenergy(runtime%sizes%ncp,runtime%timestep%dts,          &
 &                             hydro%global%zerocut,dh(cpenergyid)%raddr,       &
 &                             dh(cpmassid)%raddr,dh(cpfxid)%raddr,             &
