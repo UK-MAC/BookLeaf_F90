@@ -277,7 +277,7 @@ CONTAINS
           index1(1)=-HUGE(1_ink)
           RETURN
         ENDIF
-        IF (r-i+1.ge.j-1) THEN
+        IF (r-i+1.ge.j-l) THEN
           istack(jstack)=r
           istack(jstack-1)=i
           r=j-1_ink
@@ -375,7 +375,7 @@ CONTAINS
           index1(1)=-HUGE(1_ink)
           RETURN
         ENDIF
-        IF (r-i+1.ge.j-1) THEN
+        IF (r-i+1.ge.j-l) THEN
           istack(jstack)=r
           istack(jstack-1)=i
           r=j-1_ink
@@ -473,7 +473,7 @@ CONTAINS
           index1(1)=-HUGE(1_ink)
           RETURN
         ENDIF
-        IF (r-i+1.ge.j-1) THEN
+        IF (r-i+1.ge.j-l) THEN
           istack(jstack)=r
           istack(jstack-1)=i
           r=j-1_ink
