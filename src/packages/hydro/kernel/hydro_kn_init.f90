@@ -26,19 +26,19 @@ MODULE hydro_kn_init_mod
 
 CONTAINS
 
-  SUBROUTINE hydro_kn_viscinit(nel,elvisc,edviscx,edviscy)
+  SUBROUTINE hydro_kn_viscinit(nsize,visc,viscx,viscy)
 
     ! Argument list
-    INTEGER(KIND=ink),                     INTENT(IN)  :: nel
-    REAL(KIND=rlk),   DIMENSION(nel),      INTENT(OUT) :: elvisc
-    REAL(KIND=rlk),   DIMENSION(NCORN,nel),INTENT(OUT) :: edviscx,edviscy
+    INTEGER(KIND=ink),                     INTENT(IN)  :: nsize
+    REAL(KIND=rlk),   DIMENSION(nel),      INTENT(OUT) :: visc
+    REAL(KIND=rlk),   DIMENSION(NCORN,nel),INTENT(OUT) :: viscx,viscy
     ! Local
-    INTEGER(KIND=ink) :: iel
+    INTEGER(KIND=ink) :: ii
 
-    DO iel=1,nel
-      elvisc(iel)=0.0_rlk
-      edviscx(1:NCORN,iel)=0.0_rlk
-      edviscy(1:NCORN,iel)=0.0_rlk
+    DO ii=1,nsize
+      visc(ii)=0.0_rlk
+      viscx(1:NCORN,ii)=0.0_rlk
+      viscy(1:NCORN,ii)=0.0_rlk
     ENDDO
 
   END SUBROUTINE hydro_kn_viscinit

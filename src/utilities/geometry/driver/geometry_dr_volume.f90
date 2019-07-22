@@ -20,7 +20,7 @@ MODULE geometry_dr_volume_mod
   USE geometry_kn_volume_mod,ONLY: geometry_kn_getiso,geometry_kn_getvolume,   &
 &                                  geometry_kn_checkvolume
   USE utils_kn_gather_mod,   ONLY: utils_kn_cngather,utils_kn_mxgather
-  USE utils_kn_math_mod,     ONLY: utils_kn_multiply
+  USE utils_kn_math_mod,     ONLY: utils_kn_scale
   USE dataAPI_types_mod,     ONLY: sizes_t,data_t,error_t
   USE dataAPI_kinds_mod,     ONLY: ink,rlk
   USE dataAPI_id_mod,        ONLY: ielndid,ndxid,cnxid,ndyid,cnyid,a1id,a2id,  &
@@ -74,8 +74,7 @@ CONTAINS
       CALL geometry_kn_getvolume(sizes%ncp,dh(cpa1id)%raddr,dh(cpa3id)%raddr,  &
 &                                dh(cpb1id)%raddr,dh(cpb3id)%raddr,            &
 &                                dh(cpvolumeid)%raddr)
-      CALL utils_kn_multiply(sizes%ncp,dh(frvolumeid)%raddr,                   &
-&                            dh(cpvolumeid)%raddr)
+      CALL utils_kn_scale(sizes%ncp,dh(frvolumeid)%raddr,dh(cpvolumeid)%raddr)
     ENDIF
 
     ! Check volume is positive

@@ -77,11 +77,18 @@ END MODULE dataAPI_id_mod
 
 MODULE dataAPI_dtstepid_mod
 
-  USE dataAPI_id_mod,ONLY: scratchid=>rscratch11id,cnvid=>rscratch22id,        &
-&                          ellengthid=>rscratch12id,cnuid=>rscratch21id,       &
-&                          duid=>rscratch23id,dvid=>rscratch24id,              &
-&                          dxid=>rscratch25id,dyid=>rscratch26id,              &
+  ! General
+  USE dataAPI_id_mod,ONLY: scratchid=>rscratch11id,ellengthid=>rscratch12id,   &
+&                          cnuid=>rscratch21id,cnvid=>rscratch22id,            &
 &                          storeid=>rscratch27id
+  ! Edge Q
+  USE dataAPI_id_mod,ONLY: duid=>rscratch23id,dvid=>rscratch24id,              &
+&                          dxid=>rscratch25id,dyid=>rscratch26id,              &
+&                          limiterid=>rscratch28id,cplimiterid=>rcpscratch25id,&
+&                          cpxid=>rcpscratch21id,cpyid=>rcpscratch22id,        &
+&                          cpduid=>rcpscratch23id,cpdvid=>rcpscratch24id
+  ! Tensor Q
+
 
 END MODULE dataAPI_dtstepid_mod
 

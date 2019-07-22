@@ -26,7 +26,7 @@ MODULE data_mod
 &                              cnwtid,cnxid,cnyid,rscratch21id,rscratch22id,   &
 &                              rscratch23id,rscratch24id,rscratch25id,         &
 &                              rscratch26id,rscratch27id,rscratch28id,         &
-&                              cnviscxid,cnviscyid,elviscid,elmassid,cnmassid, &
+&                              cnviscxid,cnviscyid,elcviscid,elmassid,cnmassid,&
 &                              rscratch11id,rscratch12id,rscratch13id,         &
 &                              rscratch14id,rscratch15id,rscratch16id,         &
 &                              rscratch17id,ndxid,ndyid,nduid,ndvid,indtypeid, &
@@ -35,11 +35,12 @@ MODULE data_mod
 &                              zscratch11id,iellocglobid,indlocglobid,         &
 &                              cpdensityid,cpenergyid,cppressureid,cpcs2id,    &
 &                              cpvolumeid,frvolumeid,cpmassid,frmassid,        &
-&                              cpviscxid,cpviscyid,cpviscid,icpmatid,imxelid,  &
+&                              cpviscxid,cpviscyid,cpcviscid,icpmatid,imxelid, &
 &                              imxfcpid,imxncpid,icpnextid,icpprevid,cpa1id,   &
 &                              cpa3id,cpb1id,cpb3id,icpscratch11id,            &
 &                              icpscratch12id,rcpscratch11id,rcpscratch21id,   &
-&                              rcpscratch22id,rcpscratch23id,rcpscratch24id
+&                              rcpscratch22id,rcpscratch23id,rcpscratch24id,   &
+&                              rcpscratch25id
   USE TYPH_types_mod,    ONLY: TYPH_MESH_DIM,TYPH_REAL,TYPH_GHOSTS_ONE,        &
 &                              TYPH_GHOSTS_TWO
   USE TYPH_register_mod, ONLY: TYPH_PURE,TYPH_CENTRE_CELL,TYPH_add_quant
@@ -68,14 +69,15 @@ MODULE data_mod
 &                                                              cnviscx,cnviscy,&
 &                                                              spmass,cnmass,  &
 &                                                              cnwt,cnx,cny,b1,&
-&                                                              elvisc,b2,b3,   &
+&                                                              elcvisc,b2,b3,  &
 &                                                              cpdensity,cpcs2,&
 &                                                              cpenergy,cpmass,&
 &                                                              cpvolume,frmass,&
-&                                                              frvolume,cpvisc,&
-&                                                              cpviscx,cpviscy,&
-&                                                              cppressure,cpa1,&
-&                                                              cpa3,cpb1,cpb3
+&                                                              frvolume,cpa1,  &
+&                                                              cpa3,cpb1,cpb3, &
+&                                                              cpcvisc,cpviscx,&
+&                                                              cpviscy,        &
+&                                                              cppressure
   ! temporary
   INTEGER(KIND=ink),DIMENSION(:),ALLOCATABLE,TARGET,PRIVATE :: iscratch11,     &
 &                                                              icpscratch11,   &
@@ -100,10 +102,11 @@ MODULE data_mod
 &                                                              rcpscratch21,   &
 &                                                              rcpscratch22,   &
 &                                                              rcpscratch23,   &
-&                                                              rcpscratch24
+&                                                              rcpscratch24,   &
+&                                                              rcpscratch25
 
   ! Parameters
-  INTEGER(KIND=ink),PARAMETER,PRIVATE :: NID=79_ink
+  INTEGER(KIND=ink),PARAMETER,PRIVATE :: NID=80_ink
   INTEGER(KIND=ink),PARAMETER,PRIVATE :: IINIT=-2000000000_ink
   REAL(KIND=rlk),   PARAMETER,PRIVATE :: RINIT=-2.0e12_rlk
   LOGICAL(KIND=lak),PARAMETER,PRIVATE :: ZINIT=.FALSE._lak
@@ -193,8 +196,7 @@ CONTAINS
 &                   [nel],elenergy,dh(elenergyid),error%ierr)
     CALL data_entry("elpressure",RINIT,[nel],elpressure,dh(elpressureid),      &
 &                   error%ierr)
-    CALL data_entry("elcs2",TYPH_GHOSTS_TWO,TYPH_CENTRE_CELL,zmpi,RINIT,[nel], &
-&                    elcs2,dh(elcs2id),error%ierr)
+    CALL data_entry("elcs2",RINIT,[nel],elcs2,dh(elcs2id),error%ierr)
     CALL data_entry("elvolume",TYPH_GHOSTS_TWO,TYPH_CENTRE_CELL,zmpi,RINIT,    &
 &                   [nel],elvolume,dh(elvolumeid),error%ierr)
     CALL data_entry("a1",RINIT,[nel],a1,dh(a1id),error%ierr)
@@ -229,7 +231,7 @@ CONTAINS
 &                   error%ierr)
     CALL data_entry("cnviscy",RINIT,[NCORN,nel],cnviscy,dh(cnviscyid),         &
 &                   error%ierr)
-    CALL data_entry("elvisc",RINIT,[nel],elvisc,dh(elviscid),error%ierr)
+    CALL data_entry("elcvisc",RINIT,[nel],elcvisc,dh(elcviscid),error%ierr)
     CALL data_entry("elmass",RINIT,[nel],elmass,dh(elmassid),error%ierr)
     CALL data_entry("cnmass",TYPH_GHOSTS_TWO,TYPH_CENTRE_CELL,zmpi,RINIT,2,    &
 &                   [NCORN,nel],cnmass,dh(cnmassid),error%ierr)
@@ -359,7 +361,7 @@ CONTAINS
     CALL data_reset("frmass",RINIT,[nsize],frmass,dh(frmassid),ierr)
     CALL data_reset("cpviscx",RINIT,[nsize],cpviscx,dh(cpviscxid),ierr)
     CALL data_reset("cpviscy",RINIT,[nsize],cpviscy,dh(cpviscyid),ierr)
-    CALL data_reset("cpvisc",RINIT,[nsize],cpvisc,dh(cpviscid),ierr)
+    CALL data_reset("cpcvisc",RINIT,[nsize],cpcvisc,dh(cpcviscid),ierr)
     CALL data_reset("cpa1",RINIT,[nsize],cpa1,dh(cpa1id),ierr)
     CALL data_reset("cpa3",RINIT,[nsize],cpa3,dh(cpa3id),ierr)
     CALL data_reset("cpb1",RINIT,[nsize],cpb1,dh(cpb1id),ierr)
@@ -383,6 +385,8 @@ CONTAINS
 &                   dh(rcpscratch23id),ierr)
     CALL data_reset("rcpscratch24",[NCORN,nsize],rcpscratch24,                 &
 &                   dh(rcpscratch24id),ierr)
+    CALL data_reset("rcpscratch25",[NCORN,nsize],rcpscratch25,                 &
+&                   dh(rcpscratch25id),ierr)
 
     ! error handle
     IF (ierr.NE.SUCCESS) THEN

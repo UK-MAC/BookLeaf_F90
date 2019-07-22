@@ -22,13 +22,13 @@ MODULE hydro_kn_edgeviscosity_mod
 
   IMPLICIT NONE
 
-  PUBLIC :: hydro_kn_initeviscosity,hydro_kn_limiteviscosity,                  &
-&           hydro_kn_geteviscosity,hydro_kn_getcpeviscosity
+  PUBLIC :: hydro_kn_initedgeviscosity,hydro_kn_limitedgeviscosity,            &
+&           hydro_kn_getedgeviscosity
 
 CONTAINS
 
-  SUBROUTINE hydro_kn_initeviscosity(nel,cnx,cny,cnu,cnv,elvisc,dx,dy,du,dv,   &
-&                                    edviscx,edviscy)
+  SUBROUTINE hydro_kn_initedgeviscosity(nel,cnx,cny,cnu,cnv,elvisc,dx,dy,du,dv,&
+&                                       edviscx,edviscy)
 
     ! Argument list
     INTEGER(KIND=ink),                  INTENT(IN)  :: nel
@@ -68,25 +68,20 @@ CONTAINS
       dy(4,iel)=cny(1,iel)-cny(4,iel)
     ENDDO
 
-  END SUBROUTINE hydro_kn_initeviscosity
+  END SUBROUTINE hydro_kn_initedgeviscosity
 
-  SUBROUTINE hydro_kn_limiteviscosity(nel,nelg,nndg,zerocut,cvisc1,cvisc2,      &
-&                                     indtype,ielel,ielnd,ielfc,eldensity,elcs2,&
-&                                     du,dv,dx,dy,scratch,edviscx,edviscy,      &
-&                                     elvisc)
+  SUBROUTINE hydro_kn_limitedgeviscosity(nel,nelg,nndg,zerocut,indtype,ielel,   &
+&                                        ielnd,ielfc,du,dv,dx,dy,scratch,       &
+&                                        limiter)
 
     ! Argument list
     INTEGER(KIND=ink),                      INTENT(IN)    :: nel,nelg,nndg
-    REAL(KIND=rlk),                         INTENT(IN)    :: cvisc1,cvisc2,    &
-&                                                            zerocut    
+    REAL(KIND=rlk),                         INTENT(IN)    :: zerocut    
     INTEGER(KIND=ink),DIMENSION(nndg),      INTENT(IN)    :: indtype
     INTEGER(KIND=ink),DIMENSION(NFACE,nelg),INTENT(IN)    :: ielel,ielfc
     INTEGER(KIND=ink),DIMENSION(NCORN,nelg),INTENT(IN)    :: ielnd    
-    REAL(KIND=rlk),   DIMENSION(nelg),      INTENT(IN)    :: eldensity,elcs2
     REAL(KIND=rlk),   DIMENSION(NFACE,nelg),INTENT(IN)    :: du,dv,dx,dy
-    REAL(KIND=rlk),   DIMENSION(NFACE,nelg),INTENT(OUT)   :: scratch,edviscx,  &
-&                                                            edviscy
-    REAL(KIND=rlk),   DIMENSION(nelg),      INTENT(INOUT) :: elvisc
+    REAL(KIND=rlk),   DIMENSION(NFACE,nelg),INTENT(OUT)   :: scratch,limiter
     ! Local
     INTEGER(KIND=ink) :: iside,is1,is2,iel,in1,in2,ins,ic1,ic2
     REAL(KIND=rlk)    :: w1,w2,w3,w4,den,uhat,vhat,xhat,yhat
@@ -181,89 +176,94 @@ CONTAINS
           ENDIF
         ENDIF
       ENDDO
-      ! Apply limiter
+      ! Construct limiter
       DO iel=1,nel
         ins=ielel(is1,iel)
-        w1=cvisc1*SQRT(0.5_rlk*(elcs2(iel)+elcs2(ins)))
         w2=scratch(1,iel)
         w3=scratch(2,iel)
         w2=MIN(0.5_rlk*(w2+w3),2.0_rlk*w2,2.0_rlk*w3,1.0_rlk)
         w2=MAX(0.0_rlk,w2)
-        w3=du(is1,iel)
-        w4=dv(is1,iel)
-        w4=SQRT(w3*w3+w4*w4)
-        w3=0.5_rlk*(1.0_rlk-w2)*(eldensity(iel)+eldensity(ins))*(w1+cvisc2*w4)
-        edviscx(is1,iel)=w3
-        edviscy(is1,iel)=w3
-        w4=2.0_rlk*w4/MAX(eldensity(iel),zerocut)
-        elvisc(iel)=MAX(elvisc(iel),w3*w4)
+        limiter(is1,iel)=w2
         ins=ielel(is2,iel)
-        w1=cvisc1*SQRT(0.5_rlk*(elcs2(iel)+elcs2(ins)))
         w2=scratch(3,iel)
         w3=scratch(4,iel)
         w2=MIN(0.5_rlk*(w2+w3),2.0_rlk*w2,2.0_rlk*w3,1.0_rlk)
         w2=MAX(0.0_rlk,w2)
-        w3=du(is2,iel)
-        w4=dv(is2,iel)
-        w4=SQRT(w3*w3+w4*w4)
-        w3=0.5_rlk*(1.0_rlk-w2)*(eldensity(iel)+eldensity(ins))*(w1+cvisc2*w4)
-        edviscx(is2,iel)=w3
-        edviscy(is2,iel)=w3
-        w4=2.0_rlk*w4/MAX(eldensity(iel),zerocut)
-        elvisc(iel)=MAX(elvisc(iel),w3*w4)
+        limiter(is2,iel)=w2
       ENDDO
     ENDDO
 
-  END SUBROUTINE hydro_kn_limiteviscosity
+  END SUBROUTINE hydro_kn_limitedgeviscosity
 
-  SUBROUTINE hydro_kn_geteviscosity(nel,zerocut,cnx,cny,cnu,cnv,cnviscx,cnviscy)
+  SUBROUTINE hydro_kn_getedgeviscosity(nsize,zerocut,cvisc1,cvisc2,cnx,cny,du, &
+&                                      dv,density,cs2,limiter,cnviscx,cnviscy, &
+&                                      cvisc)
 
     ! Argument list
-    INTEGER(KIND=ink),                     INTENT(IN)    :: nel
-    REAL(KIND=rlk),                        INTENT(IN)    :: zerocut
-    REAL(KIND=rlk),   DIMENSION(NCORN,nel),INTENT(IN)    :: cnx,cny,cnu,cnv
-    REAL(KIND=rlk),   DIMENSION(NFACE,nel),INTENT(INOUT) :: cnviscx,cnviscy
+    INTEGER(KIND=ink),                       INTENT(IN)  :: nsize
+    REAL(KIND=rlk),                          INTENT(IN)  :: zerocut,cvisc1,    &
+&                                                           cvisc2      
+    REAL(KIND=rlk),   DIMENSION(NCORN,nsize),INTENT(IN)  :: cnx,cny
+    REAL(KIND=rlk),   DIMENSION(NFACE,nsize),INTENT(IN)  :: du,dv,limiter
+    REAL(KIND=rlk),   DIMENSION(nsize),      INTENT(IN)  :: density,cs2
+    REAL(KIND=rlk),   DIMENSION(NFACE,nsize),INTENT(OUT) :: cnviscx,cnviscy
+    REAL(KIND=rlk),   DIMENSION(nsize),      INTENT(OUT) :: cvisc
     ! Local
-    INTEGER(KIND=ink)                  :: iside,ins,iel
-    REAL(KIND=rlk)                     :: w1,w2,w3,w4,w5,w6,w7,w8,den,xhat,    &
-&                                         yhat,uhat,vhat
+    INTEGER(KIND=ink)                  :: iside,ins,ii
+    REAL(KIND=rlk)                     :: xmean,x1,x2,xmid,xsdiff,sxnorm,edgex,&
+&                                         ymean,y1,y2,ymid,ysdiff,synorm,edgey,&
+&                                         w1,w2,w3,side_off,invside_off,       &
+&                                         side_len,invside_len,dotprod,magdv
     REAL(KIND=rlk),   DIMENSION(NFACE) :: edviscx,edviscy 
 
-    DO iel=1,nel
+    DO ii=1,nsize
+      xmean=0.25_rlk*(cnx(1,ii)+cnx(2,ii)+cnx(3,ii)+cnx(4,ii))
+      ymean=0.25_rlk*(cny(1,ii)+cny(2,ii)+cny(3,ii)+cny(4,ii))
       DO iside=1,NFACE
+        ! apply limiter
+        w1=cvisc1*SQRT(cs2(ii))
+        magdv=SQRT(du(iside,ii)*du(iside,ii)+dv(iside,ii)*dv(iside,ii))
+        w2=(1.0_rlk-limiter(iside,ii))*density(ii)*(w1+cvisc2*magdv)
+        edviscx(iside)=w2
+        edviscy(iside)=w2
+        w3=2.0_rlk*w2*magdv/density(ii)
+        cvisc(ii)=MAX(cvisc(ii),w3)
+        ! calculate mesh forces
         ins=MOD(iside,NFACE)+1_ink
-        w1=cnx(iside,iel)
-        w2=cnx(ins,iel)
-        w3=0.5_rlk*(w1+w2)
-        w1=w2-w1
-        w2=0.25_rlk*(cnx(1,iel)+cnx(2,iel)+cnx(3,iel)+cnx(4,iel))
-        w4=cny(iside,iel)
-        w5=cny(ins,iel)
-        w6=0.5_rlk*(w4+w5)
-        w4=w5-w4
-        w5=0.25_rlk*(cny(1,iel)+cny(2,iel)+cny(3,iel)+cny(4,iel))
-        w7=SQRT((w2-w3)*(w2-w3)+(w5-w6)*(w5-w6))
-        w8=SQRT(w1*w1+w4*w4)
-        den=1.0_rlk/w7
-        xhat=(w5-w6)*den
-        yhat=(w3-w2)*den
-        den=1.0_rlk/w8
-        w1=w1*den
-        w2=w4*den
-        w3=xhat*w1+yhat*w2
-        den=-SIGN(1.0_rlk,w3)*w7
-        xhat=xhat*den
-        yhat=yhat*den
-        uhat=cnu(ins,iel)-cnu(iside,iel)
-        vhat=cnv(ins,iel)-cnv(iside,iel)
-        w5=SQRT((uhat*uhat)+(vhat*vhat))
-        w6=uhat*xhat+vhat*yhat
-        den=w6/MAX(w5,zerocut)
-        edviscx(iside)=cnviscx(iside,iel)*uhat*den
-        edviscy(iside)=cnviscy(iside,iel)*vhat*den
+        x1=cnx(iside,iel)
+        x2=cnx(ins,iel)
+        xmid=0.5_rlk*(x1+x2)
+        xsdiff=x2-x1
+        y1=cny(iside,iel)
+        y2=cny(ins,iel)
+        ymid=0.5_rlk*(y1+y2)
+        ysdiff=y2-y1
+        ! define vector S which is normal to the line joining edge mid-point
+        ! to cell centroid for edge triangular sub-cell.
+        ! Calculate normal from tangent
+        side_off=SQRT((xmean-xmid)*(xmean-xmid)+(ymean-ymid)*(ymean-ymid))
+        invside_off=1.0_rlk/side_off
+        sxnorm=(ymean-ymid)*invside_off
+        synorm=(xmid-xmean)*invside_off
+        ! check direction against edge
+        side_len=SQRT(xsdiff*xsdiff+ysdiff*ysdiff)
+        invside_len=1.0_rlk/side_len
+        edgex=xsdiff*invside_len
+        edgey=ysdiff*invside_len
+        ! form dot product between vector S and edge
+        dotprod=sxnorm*edgex+synorm*edgey
+        w1=-SIGN(1.0_rlk,dotprod)*side_off
+        sxnorm=sxnorm*w1
+        synorm=synorm*w1
+        ! calculate unit vector for change in velocity along edge
+        dotprod=du(iside,ii)*sxnorm+dv(iside,ii)*synorm
+        ! multiply by unit vector of delta v
+        w1=dotprod/MAX(magdv,zerocut)
+        edviscx(iside)=edviscx(iside)*du(iside,ii)*w1
+        edviscy(iside)=edviscy(iside)*dv(iside,ii)*w1
         ! apply cut-off
-        IF ((w5.LE.zerocut).OR.(w6.LE.zerocut).OR.(w7.LE.zerocut).OR.          &
-&           (w8.LE.zerocut)) THEN
+        IF ((magdv.LE.zerocut).OR.(dotprod.LE.zerocut).OR.                     &
+&           (side_off.LE.zerocut).OR.(side_len.LE.zerocut)) THEN
           edviscx(iside)=0.0_rlk
           edviscy(iside)=0.0_rlk
         ENDIF
@@ -279,33 +279,6 @@ CONTAINS
       cnviscy(4,iel)=edviscy(4)-edviscy(3)
     ENDDO
 
-  END SUBROUTINE hydro_kn_geteviscosity
-
-  SUBROUTINE hydro_kn_getcpeviscosity(ncp,cvisc1,cvisc2,cpdensity,cpcs2,phi,   &
-&                                     cpvisc)
-
-    ! Argument list
-    INTEGER(KIND=ink),                     INTENT(IN)  :: ncp
-    REAL(KIND=rlk),                        INTENT(IN)  :: cvisc1,cvisc2
-    REAL(KIND=rlk),   DIMENSION(ncp),      INTENT(IN)  :: cpdensity,cpcs2
-    REAL(KIND=rlk),   DIMENSION(NFACE,ncp),INTENT(IN)  :: phi
-    REAL(KIND=rlk),   DIMENSION(ncp),      INTENT(OUT) :: cpvisc
-    ! Local
-    INTEGER(KIND=ink) :: icp,iside
-    REAL(KIND=rlk)    :: w1,w2
-
-!    DO icp=1,ncp
-!      cpvisc(icp)=0.0_rlk
-!      DO iside=1,NFACE
-!        w1=(1.0_rlk-phi(iside,icp))*cpdensity(icp)*(cvisc1*SQRT(cpcs2(icp))+   &
-!&                                                   cvisc2*)
-!        edviscx(iside)=w1
-!        edviscy(iside)=w1
-!        w2=2.0_rlk*/MAX(cpdensity(icp),zerocut)
-!        cpvisc(icp)=MAX(cpvisc(icp),w1*w2)
-!      ENDDO
-!    ENDDO
-
-  END SUBROUTINE hydro_kn_getcpeviscosity
+  END SUBROUTINE hydro_kn_getedgeviscosity
 
 END MODULE hydro_kn_edgeviscosity_mod

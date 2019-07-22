@@ -22,16 +22,40 @@ MODULE utils_kn_average_mod
 
   IMPLICIT NONE
 
-  PUBLIC :: utils_kn_average11,utils_kn_average22,utils_kn_average12
+  PUBLIC :: utils_kn_mxsum,utils_kn_mxaverage,utils_kn_mxaveragecn
 
 CONTAINS
 
-  SUBROUTINE utils_kn_average11(ncp,nmx,nel,imxel,imxcp,imxncp,mxfraction,     &
+  SUBROUTINE utils_kn_mxsum(ncp,nmx,nel,imxel,imxfcp,imxncp,mxarray,elarray)
+
+    ! Argument list
+    INTEGER(KIND=ink),               INTENT(IN)    :: ncp,nmx,nel
+    INTEGER(KIND=ink),DIMENSION(nmx),INTENT(IN)    :: imxel,imxfcp,imxncp
+    REAL(KIND=rlk),   DIMENSION(ncp),INTENT(IN)    :: mxarray
+    REAL(KIND=rlk),   DIMENSION(nel),INTENT(INOUT) :: elarray
+    ! Local
+    INTEGER(KIND=ink) :: imx,iel,icp,ii
+    REAL(KIND=rlk)    :: w1
+
+    DO imx=1,nmx
+      w1=0.0_rlk
+      icp=imxfcp(imx)
+      DO ii=1,imxncp(imx)
+        w1=w1+mxarray(icp)
+        icp=icp+1_ink
+      ENDDO
+      iel=imxel(imx)
+      elarray(iel)=w1
+    ENDDO
+
+  END SUBROUTINE utils_kn_mxsum
+
+  SUBROUTINE utils_kn_mxaverage(ncp,nmx,nel,imxel,imxfcp,imxncp,mxfraction,    &
 &                               mxarray,elarray)
 
     ! Argument list
     INTEGER(KIND=ink),               INTENT(IN)    :: ncp,nmx,nel
-    INTEGER(KIND=ink),DIMENSION(nmx),INTENT(IN)    :: imxel,imxcp,imxncp
+    INTEGER(KIND=ink),DIMENSION(nmx),INTENT(IN)    :: imxel,imxfcp,imxncp
     REAL(KIND=rlk),   DIMENSION(ncp),INTENT(IN)    :: mxfraction,mxarray
     REAL(KIND=rlk),   DIMENSION(nel),INTENT(INOUT) :: elarray
     ! Local
@@ -40,7 +64,7 @@ CONTAINS
 
     DO imx=1,nmx
       w1=0.0_rlk
-      icp=imxcp(imx)
+      icp=imxfcp(imx)
       DO ii=1,imxncp(imx)
         w1=w1+mxfraction(icp)*mxarray(icp)
         icp=icp+1_ink
@@ -49,61 +73,32 @@ CONTAINS
       elarray(iel)=w1
     ENDDO
 
-  END SUBROUTINE utils_kn_average11
+  END SUBROUTINE utils_kn_mxaverage
 
-  SUBROUTINE utils_kn_average22(ncp,nmx,nel,imxel,imxcp,imxncp,mxfraction,     &
-&                               mxarray1,mxarray2,elarray1,elarray2)
+  SUBROUTINE utils_kn_mxaveragecn(ncp,nmx,nel,imxel,imxfcp,imxncp,mxfraction,  &
+&                                 mxarray,elarray)
 
     ! Argument list
     INTEGER(KIND=ink),                     INTENT(IN)    :: ncp,nmx,nel
-    INTEGER(KIND=ink),DIMENSION(nmx),      INTENT(IN)    :: imxel,imxcp,imxncp
+    INTEGER(KIND=ink),DIMENSION(nmx),      INTENT(IN)    :: imxel,imxfcp,imxncp
     REAL(KIND=rlk),   DIMENSION(ncp),      INTENT(IN)    :: mxfraction
-    REAL(KIND=rlk),   DIMENSION(NCORN,ncp),INTENT(IN)    :: mxarray1,mxarray2
-    REAL(KIND=rlk),   DIMENSION(NCORN,nel),INTENT(INOUT) :: elarray1,elarray2
+    REAL(KIND=rlk),   DIMENSION(NCORN,ncp),INTENT(IN)    :: mxarray
+    REAL(KIND=rlk),   DIMENSION(NCORN,nel),INTENT(INOUT) :: elarray
     ! Local
     INTEGER(KIND=ink)                  :: imx,iel,icp,ii
-    REAL(KIND=rlk),   DIMENSION(NCORN) :: w1,w2
+    REAL(KIND=rlk),   DIMENSION(NCORN) :: w1
 
     DO imx=1,nmx
       w1(1:NCORN)=0.0_rlk
-      w2(1:NCORN)=0.0_rlk
-      icp=imxcp(imx)
+      icp=imxfcp(imx)
       DO ii=1,imxncp(imx)
-        w1(1:NCORN)=w1(1:NCORN)+mxfraction(icp)*mxarray1(1:NCORN,icp)
-        w2(1:NCORN)=w2(1:NCORN)+mxfraction(icp)*mxarray2(1:NCORN,icp)
+        w1(1:NCORN)=w1(1:NCORN)+mxfraction(icp)*mxarray(1:NCORN,icp)
         icp=icp+1_ink
       ENDDO
       iel=imxel(imx)
-      elarray1(1:NCORN,iel)=w1(1:NCORN)
-      elarray2(1:NCORN,iel)=w2(1:NCORN)
+      elarray(1:NCORN,iel)=w1(1:NCORN)
     ENDDO
 
-  END SUBROUTINE utils_kn_average22
-
-  SUBROUTINE utils_kn_average12(ncp,nmx,nel,imxel,imxcp,imxncp,mxfraction,     &
-&                               mxarray1,mxarray2,elarray)
-
-    ! Argument list
-    INTEGER(KIND=ink),               INTENT(IN)    :: ncp,nmx,nel
-    INTEGER(KIND=ink),DIMENSION(nmx),INTENT(IN)    :: imxel,imxcp,imxncp
-    REAL(KIND=rlk),   DIMENSION(ncp),INTENT(IN)    :: mxfraction,mxarray1,     &
-&                                                     mxarray2
-    REAL(KIND=rlk),   DIMENSION(nel),INTENT(INOUT) :: elarray
-    ! Local
-    INTEGER(KIND=ink) :: imx,iel,icp,ii
-    REAL(KIND=rlk)    :: w1
-
-    DO imx=1,nmx
-      w1=0.0_rlk
-      icp=imxcp(imx)
-      DO ii=1,imxncp(imx)
-        w1=w1+mxfraction(icp)*(mxarray1(icp)+mxarray2(icp))
-        icp=icp+1_ink
-      ENDDO
-      iel=imxel(imx)
-      elarray(iel)=w1
-    ENDDO
-
-  END SUBROUTINE utils_kn_average12
+  END SUBROUTINE utils_kn_mxaveragecn
 
 END MODULE utils_kn_average_mod

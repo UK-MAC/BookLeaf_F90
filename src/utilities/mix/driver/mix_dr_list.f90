@@ -23,7 +23,7 @@ MODULE mix_dr_list_mod
   USE dataAPI_id_mod,     ONLY: ielmatid,imxelid,imxncpid,imxfcpid,icpprevid,  &
 &                               icpnextid,icpmatid,cpenergyid,cpmassid,        &
 &                               cpdensityid,cpvolumeid,cpcs2id,cppressureid,   &
-&                               cpviscid,cpviscxid,cpviscyid,frvolumeid,       &
+&                               cpcviscid,cpviscxid,cpviscyid,frvolumeid,      &
 &                               frmassid,ielmatid,elmassid,elenergyid,         &
 &                               iscratch11id,icpscratch11id,icpscratch12id,    &
 &                               rcpscratch11id
@@ -39,7 +39,8 @@ MODULE mix_dr_list_mod
 
   REAL(KIND=rlk),PARAMETER,PRIVATE :: INCR=0.05_rlk
 
-  PUBLIC :: mix_dr_addel,mix_dr_deleteel,mix_dr_addcp,mix_dr_deletecp
+  PUBLIC :: mix_dr_addel,mix_dr_deleteel,mix_dr_addcp,mix_dr_deletecp,         &
+&           mix_dr_flatten
 
 CONTAINS
 
@@ -107,7 +108,7 @@ CONTAINS
 &                        dh(cpenergyid)%raddr,dh(cpmassid)%raddr,              &
 &                        dh(cpdensityid)%raddr,dh(cpvolumeid)%raddr,           &
 &                        dh(cpcs2id)%raddr,dh(cppressureid)%raddr,             &
-&                        dh(cpviscid)%raddr,dh(cpviscxid)%raddr,               &
+&                        dh(cpcviscid)%raddr,dh(cpviscxid)%raddr,              &
 &                        dh(cpviscyid)%raddr,dh(frvolumeid)%raddr,             &
 &                        dh(frmassid)%raddr)
     sizes%nmx=sizes%nmx-1_ink
@@ -169,7 +170,7 @@ CONTAINS
 &                        dh(cpenergyid)%raddr,dh(cpmassid)%raddr,              &
 &                        dh(cpdensityid)%raddr,dh(cpvolumeid)%raddr,           &
 &                        dh(cpcs2id)%raddr,dh(cppressureid)%raddr,             &
-&                        dh(cpviscid)%raddr,dh(cpviscxid)%raddr,               &
+&                        dh(cpcviscid)%raddr,dh(cpviscxid)%raddr,              &
 &                        dh(cpviscyid)%raddr,dh(frvolumeid)%raddr,             &
 &                        dh(frmassid)%raddr,ii)
     sizes%ncp=sizes%ncp-1_ink

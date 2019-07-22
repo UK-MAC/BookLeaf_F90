@@ -17,13 +17,15 @@
 ! @HEADER@
 MODULE check_dr_tests_mod
 
-  USE dataAPI_kinds_mod,  ONLY: ink,rlk
-  USE dataAPI_types_mod,  ONLY: config_t,runtime_t,data_t
-  USE dataAPI_id_mod,     ONLY: elvolumeid,eldensityid,elenergyid,ndxid,ndyid, &
-&                               ielndid,cnxid,cnyid
-  USE typhon_API_mod,     ONLY: TYPH_Reduce,TYPH_OP_SUM
-  USE check_kn_tests_mod, ONLY: check_kn_sod
-  USE utils_kn_gather_mod,ONLY: utils_kn_cngather
+  USE dataAPI_kinds_mod,   ONLY: ink,rlk
+  USE dataAPI_types_mod,   ONLY: config_t,runtime_t,data_t
+  USE dataAPI_id_mod,      ONLY: elvolumeid,eldensityid,elenergyid,ndxid,ndyid,&
+&                                ielndid,cnxid,cnyid,cpdensityid,cpenergyid,   &
+&                                imxelid,imxfcpid,imxncpid,frvolumeid,frmassid
+  USE typhon_API_mod,      ONLY: TYPH_Reduce,TYPH_OP_SUM
+  USE check_kn_tests_mod,  ONLY: check_kn_sod
+  USE utils_kn_gather_mod, ONLY: utils_kn_cngather
+  USE utils_kn_average_mod,ONLY: utils_kn_mxaverage
 
   IMPLICIT NONE
 
@@ -51,6 +53,20 @@ CONTAINS
 &                          dh(ielndid)%iaddr,dh(ndxid)%raddr,dh(cnxid)%raddr)
     CALL utils_kn_cngather(runtime%sizes%nel,runtime%sizes%nnd,                &
 &                          dh(ielndid)%iaddr,dh(ndyid)%raddr,dh(cnyid)%raddr)
+
+    ! average any multi-material cells
+    IF (runtime%sizes%ncp.GT.0_ink) THEN
+      CALL utils_kn_mxaverage(runtime%sizes%ncp,runtime%sizes%nmx,             &
+&                             runtime%sizes%nel,dh(imxelid)%iaddr,             &
+&                             dh(imxfcpid)%iaddr,dh(imxncpid)%iaddr,           &
+&                             dh(frvolumeid)%raddr,dh(cpdensityid)%raddr,      &
+&                             dh(eldensityid)%raddr)
+      CALL utils_kn_mxaverage(runtime%sizes%ncp,runtime%sizes%nmx,             &
+&                             runtime%sizes%nel,dh(imxelid)%iaddr,             &
+&                             dh(imxfcpid)%iaddr,dh(imxncpid)%iaddr,           &
+&                             dh(frmassid)%raddr,dh(cpenergyid)%raddr,         &
+&                             dh(elenergyid)%raddr)
+    ENDIF
 
     ! calculate L1 norm components for density and energy
     CALL check_kn_sod(runtime%sizes%nel,runtime%timestep%time,                 &

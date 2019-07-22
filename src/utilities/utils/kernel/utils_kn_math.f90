@@ -21,7 +21,7 @@ MODULE utils_kn_math_mod
 
   IMPLICIT NONE
 
-  PUBLIC :: utils_kn_divide,utils_kn_sum,utils_kn_multiply
+  PUBLIC :: utils_kn_divide,utils_kn_add,utils_kn_multiply,utils_kn_scale
 
 CONTAINS
 
@@ -40,7 +40,7 @@ CONTAINS
 
   END SUBROUTINE utils_kn_divide
 
-  SUBROUTINE utils_kn_sum(nsz,right,answer)
+  SUBROUTINE utils_kn_add(nsz,right,answer)
 
     ! Argument list
     INTEGER(KIND=ink),               INTENT(IN)    :: nsz
@@ -53,9 +53,24 @@ CONTAINS
       answer(ii)=answer(ii)+right(ii)
     ENDDO
 
-  END SUBROUTINE utils_kn_sum
+  END SUBROUTINE utils_kn_add
 
-  SUBROUTINE utils_kn_multiply(nsz,factor,answer)
+  SUBROUTINE utils_kn_multiply(nsz,factor1,factor2,answer)
+
+    ! Argument list
+    INTEGER(KIND=ink),               INTENT(IN)    :: nsz
+    REAL(KIND=rlk),   DIMENSION(nsz),INTENT(IN)    :: factor1,factor2
+    REAL(KIND=rlk),   DIMENSION(nsz),INTENT(INOUT) :: answer
+    ! Local
+    INTEGER(KIND=ink) :: ii
+
+    DO ii=1,nsz
+      answer(ii)=factor1(ii)*factor2(ii)
+    ENDDO
+
+  END SUBROUTINE utils_kn_multiply
+
+  SUBROUTINE utils_kn_scale(nsz,factor,answer)
 
     ! Argument list
     INTEGER(KIND=ink),               INTENT(IN)    :: nsz
@@ -68,6 +83,6 @@ CONTAINS
       answer(ii)=answer(ii)*factor(ii)
     ENDDO
 
-  END SUBROUTINE utils_kn_multiply
+  END SUBROUTINE utils_kn_scale
 
 END MODULE utils_kn_math_mod

@@ -24,7 +24,7 @@ MODULE init_dr_utils_mod
 &                                  eldensityid,elenergyid,elvolumeid,cnwtid,   &
 &                                  elmassid,cnmassid,cpdensityid,cpvolumeid,   &
 &                                  cpmassid,imxelid,imxfcpid,imxncpid,frmassid,&
-&                                  rcpscratch11id
+&                                  frvolumeid,rcpscratch11id
   USE timerAPI_types_mod,    ONLY: timer_t
   USE eos_dr_geteos_mod,     ONLY: eos_dr_geteos
   USE eos_cf_mod,            ONLY: eos_cf_defaults
@@ -33,8 +33,9 @@ MODULE init_dr_utils_mod
   USE utils_dr_sort_mod,     ONLY: utils_dr_sortwrapper
   USE utils_kn_sort_mod,     ONLY: utils_kn_arthwrapper
   USE utils_kn_gather_mod,   ONLY: utils_kn_mxgather
-  USE utils_kn_math_mod,     ONLY: utils_kn_divide
-  USE init_kn_mod,           ONLY: init_kn_elmass,init_kn_mxmass
+  USE utils_kn_average_mod,  ONLY: utils_kn_mxaverage,utils_kn_mxsum
+  USE utils_kn_math_mod,     ONLY: utils_kn_divide,utils_kn_multiply
+  USE init_kn_mod,           ONLY: init_kn_cnmass
 
   IMPLICIT NONE
 
@@ -114,20 +115,29 @@ CONTAINS
     TYPE(sizes_t),             INTENT(IN)    :: sizes
     TYPE(data_t), DIMENSION(:),INTENT(INOUT) :: dh
 
-    ! initialise clean cells
-    CALL init_kn_elmass(sizes%nel,dh(eldensityid)%raddr,dh(elvolumeid)%raddr,  &
-&                       dh(cnwtid)%raddr,dh(elmassid)%raddr,dh(cnmassid)%raddr)    
-
-    ! initialise mixed cells
+    ! initialise mass
+    CALL utils_kn_multiply(sizes%nel,dh(eldensityid)%raddr,                    &
+&                          dh(elvolumeid)%raddr,dh(elmassid)%raddr)
     IF (sizes%ncp.GT.0_ink) THEN
-      CALL init_kn_mxmass(sizes%ncp,dh(cpdensityid)%raddr,dh(cpvolumeid)%raddr,&
-&                         dh(cpmassid)%raddr)
+      CALL utils_kn_multiply(sizes%ncp,dh(cpdensityid)%raddr,                  &
+&                            dh(cpvolumeid)%raddr,dh(cpmassid)%raddr)
+      ! initialise mass fraction
+      CALL utils_kn_mxsum(sizes%ncp,sizes%nmx,sizes%nel,dh(imxelid)%iaddr,     &
+&                         dh(imxfcpid)%iaddr,dh(imxncpid)%iaddr,               &
+&                         dh(cpmassid)%raddr,dh(elmassid)%raddr)
       CALL utils_kn_mxgather(sizes%nel,sizes%nmx,sizes%ncp,dh(imxelid)%iaddr,  &
 &                            dh(imxfcpid)%iaddr,dh(imxncpid)%iaddr,            &
 &                            dh(elmassid)%raddr,dh(rcpscratch11id)%raddr)
       CALL utils_kn_divide(sizes%ncp,dh(cpmassid)%raddr,                       &
 &                          dh(rcpscratch11id)%raddr,dh(frmassid)%raddr)
+      CALL utils_kn_mxaverage(sizes%ncp,sizes%nmx,sizes%nel,dh(imxelid)%iaddr, &
+&                             dh(imxfcpid)%iaddr,dh(imxncpid)%iaddr,           &
+&                             dh(frvolumeid)%raddr,dh(cpdensityid)%raddr,      &
+&                             dh(eldensityid)%raddr)
     ENDIF
+    ! initialise corner mass
+    CALL init_kn_cnmass(sizes%nel,dh(eldensityid)%raddr,dh(cnwtid)%raddr,      &
+&                       dh(cnmassid)%raddr)
 
   END SUBROUTINE init_dr_mass
 

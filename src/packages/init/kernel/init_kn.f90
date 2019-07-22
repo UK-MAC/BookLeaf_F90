@@ -24,43 +24,26 @@ MODULE init_kn_mod
 
   IMPLICIT NONE
 
-  PUBLIC :: init_kn_elmass,init_kn_mxmass,init_kn_connectivity,                &
-&           init_kn_nodetype,init_kn_serialghosts
+  PUBLIC :: init_kn_cnmass,init_kn_connectivity,init_kn_nodetype,              &
+&           init_kn_serialghosts
 
 CONTAINS
 
-  SUBROUTINE init_kn_elmass(nel,eldensity,elvolume,cnwt,elmass,cnmass)
+  SUBROUTINE init_kn_cnmass(nel,eldensity,cnwt,cnmass)
 
     ! Argument list
     INTEGER(KIND=ink),                     INTENT(IN)  :: nel
-    REAL(KIND=rlk),   DIMENSION(nel),      INTENT(IN)  :: eldensity,elvolume
+    REAL(KIND=rlk),   DIMENSION(nel),      INTENT(IN)  :: eldensity
     REAL(KIND=rlk),   DIMENSION(NCORN,nel),INTENT(IN)  :: cnwt
-    REAL(KIND=rlk),   DIMENSION(nel),      INTENT(OUT) :: elmass
     REAL(KIND=rlk),   DIMENSION(NCORN,nel),INTENT(OUT) :: cnmass
     ! Local
     INTEGER(KIND=ink) :: iel
 
     DO iel=1,nel
-      elmass(iel)=eldensity(iel)*elvolume(iel)
       cnmass(1:NCORN,iel)=eldensity(iel)*cnwt(1:NCORN,iel)
     ENDDO
 
   END SUBROUTINE init_kn_elmass
-
-  SUBROUTINE init_kn_mxmass(ncp,mxdensity,mxvolume,mxmass)
-
-    ! Argument list
-    INTEGER(KIND=ink),               INTENT(IN)  :: ncp
-    REAL(KIND=rlk),   DIMENSION(ncp),INTENT(IN)  :: mxdensity,mxvolume
-    REAL(KIND=rlk),   DIMENSION(ncp),INTENT(OUT) :: mxmass
-    ! Local
-    INTEGER(KIND=ink) :: icp
-
-    DO icp=1,ncp
-      mxmass(icp)=mxdensity(icp)*mxvolume(icp)
-    ENDDO
-
-  END SUBROUTINE init_kn_mxmass
 
   SUBROUTINE init_kn_connectivity(nel,ielnd,ielel,ielsd)
 

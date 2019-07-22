@@ -36,6 +36,7 @@ MODULE hydro_dr_print_mod
 &                               hydro_kn_write_table_shortprint,               &
 &                               hydro_kn_write_total_shortprint,               &
 &                               hydro_kn_longprint
+  USE hydro_dr_utils_mod, ONLY: hydro_dr_averagestate
   USE utils_kn_gather_mod,ONLY: utils_kn_cngather,utils_kn_mxgathercncp
   USE typhon_API_mod,     ONLY: TYPH_reduce,TYPH_OP_SUM,TYPH_OP_MIN,TYPH_OP_MAX
 
@@ -69,6 +70,9 @@ CONTAINS
 &                          dh(ielndid)%iaddr,dh(nduid)%raddr,dh(cnuid)%raddr)
     CALL utils_kn_cngather(runtime%sizes%nel,runtime%sizes%nnd,                &
 &                          dh(ielndid)%iaddr,dh(ndvid)%raddr,dh(cnvid)%raddr)
+
+    ! Average element values from components
+    CALL hydro_dr_averagestate(runtime%sizes,dh)
 
     ! Calculate table values
     CALL hydro_kn_init_shortprint(runtime%sizes%nreg,reg_vol,reg_mass,reg_ke,  &
